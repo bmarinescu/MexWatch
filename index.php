@@ -3,6 +3,20 @@
 	function api_call($url, $method = 'GET', $data = []) {
 		$apiKey = 'kuKCNxKcyd0jKRPG3fRxAUFk';
 		$apiSecret = 'aUY4oUm5zhCTbQAsayM7iwwsiuKvgIpuXU-MaRI15hL5Daih'; 
+		$apiUrl = 'https://www.bitmex.com/api/v1';
+
+		// $priv = $_GET['priv'];
+		// $pub = $_GET["pub"];
+		// $testnet = $_GET["testnet"];
+
+		// if((!empty($testnet))) {
+		// 	$apiUrl = 'https://testnet.bitmex.com';
+		// }
+
+		// if((!empty($priv)) && (!empty($priv))) {
+		// 	$apiKey = $pub;
+		// 	$apiSecret = $priv;
+		// }
 
 		$verb = 'GET';
 		$path = '/api/v1'.$url;
@@ -116,10 +130,10 @@
 												<td><?php echo $position["liquidationPrice"]; ?></td>
 												<td><?php echo $position["crossMargin"]; ?></td>
 												<td>
-													<?php echo $position["simplePnl"]; ?>
+													<?php echo $position["simplePnl"]; ?> XBT
 													<?php //echo $position["unrealisedRoePcnt"]*100 . "%"; ?>
 												</td>
-												<td><?php echo $position["realisedGrossPnl"]; ?></td>
+												<td><?php echo $position["realisedGrossPnl"]; ?> XBT</td>
 											</tr>
 				       					<?php }
 				       				?>
@@ -153,7 +167,12 @@
 				    </div>
 				    <div class="tab-pane fade" id="fills">
 				        <div class="fills_inner">
-				        	<?php //api_call('/position'); ?>
+				        	<?php $execution = json_decode(api_call('/execution/tradeHistory'), true); ?>
+				        	<?php 
+        						echo "<pre>";
+					        	print_r($execution);
+        						echo "</pre>";
+				        	 ?>
 				        </div>
 				    </div>
 				    <div class="tab-pane fade" id="order_history">
