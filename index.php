@@ -81,7 +81,11 @@
 			.tab-pane { padding-top: 15px; }
 			#tabs_main + .panel-group .panel-heading { padding: 0; }
 			#tabs_main + .panel-group .panel-heading a { padding: 10px 15px; display: block; }
+			
+			tr[data-order-type="Sell"] td:first-child	{ border-left: 4px solid #ff0000 !important; }
+			tr[data-order-type="Buy"] td:first-child	{ border-left: 4px solid #00ff00 !important; }
 
+			body { overflow-y: scroll; }
 			
 		</style>
 	</head>
@@ -97,30 +101,30 @@
 					<li><a href="#order_history" data-toggle="tab">Order History</a></li>
 				</ul>
 				<div id="myTabContent" class="tab-content">
-				    <div class="tab-pane fade in active" id="positions_tab">
-				       	<div class="positions_tab_inner">
-				       		<?php 
-				       			$positions = json_decode(api_call('/position'), true);
+					<div class="tab-pane fade in active" id="positions_tab">
+						<div class="positions_tab_inner">
+							<?php 
+								$positions = json_decode(api_call('/position'), true);
 
-				       		
-				       		 ?>
-				       		<table class="table table-striped">
-				       			<thead>
-				       				<tr>
-				       					<th>Symbol</th>
-				       					<th>Size</th>
-				       					<th>Value</th>
-				       					<th>Entry Price</th>
-				       					<th>Mark Price</th>
-				       					<th>Liq. Price</th>
-				       					<th>Margin</th>
-				       					<th>Unrealised PNL<!--  (ROE %) --></th>
-				       					<th>Realised PNL</th>
-				       				</tr>
-				       				<tbody>
-				       					
-				       				<?php 
-				       					foreach ($positions as $position) { ?>
+							
+							 ?>
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Symbol</th>
+										<th>Size</th>
+										<th>Value</th>
+										<th>Entry Price</th>
+										<th>Mark Price</th>
+										<th>Liq. Price</th>
+										<th>Margin</th>
+										<th>Unrealised PNL<!--  (ROE %) --></th>
+										<th>Realised PNL</th>
+									</tr>
+									<tbody>
+										
+									<?php 
+										foreach ($positions as $position) { ?>
 											<tr>
 												<td><?php echo $position["symbol"]; ?></td>
 												<td><?php echo $position["currentQty"]; ?></td>
@@ -135,51 +139,101 @@
 												</td>
 												<td><?php echo $position["realisedGrossPnl"]; ?> XBT</td>
 											</tr>
-				       					<?php }
-				       				?>
-				       				</tbody>
-				       			</thead>
-				       		</table>
+										<?php }
+									?>
+									</tbody>
+								</thead>
+							</table>
 
-		       				<?php 
+							<?php 
 
-		       				echo "<pre>";
-		       				print_r(json_decode(api_call('/position'), true));
-		       				echo "</pre>";
+							echo "<pre>";
+							print_r(json_decode(api_call('/position'), true));
+							echo "</pre>";
 
-		       				 ?>
-				       	</div>
-				    </div>
-				    <div class="tab-pane fade" id="closed_positions_tab">
-				        <div class="closed_positions_tab_inner">
-				        	<?php //api_call('/position'); ?>
-				        </div>
-				    </div>
-				    <div class="tab-pane fade" id="active_orders_tab">
-				        <div class="active_orders_tab_inner">
-				        	<?php //api_call('/position'); ?>
-				        </div>
-				    </div>
-				    <div class="tab-pane fade" id="stops">
-				        <div class="stops_inner">
-				        	<?php //api_call('/position'); ?>
-				        </div>
-				    </div>
-				    <div class="tab-pane fade" id="fills">
-				        <div class="fills_inner">
-				        	<?php $execution = json_decode(api_call('/execution/tradeHistory'), true); ?>
-				        	<?php 
-        						echo "<pre>";
-					        	print_r($execution);
-        						echo "</pre>";
-				        	 ?>
-				        </div>
-				    </div>
-				    <div class="tab-pane fade" id="order_history">
-				        <div class="order_history_inner">
-				        	<?php //api_call('/position'); ?>
-				        </div>
-				    </div>
+							 ?>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="closed_positions_tab">
+						<div class="closed_positions_tab_inner">
+							<?php //api_call('/position'); ?>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="active_orders_tab">
+						<div class="active_orders_tab_inner">
+							<?php //api_call('/position'); ?>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="stops">
+						<div class="stops_inner">
+							<?php //api_call('/position'); ?>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="fills">
+						<div class="fills_inner">
+							<?php $fills = json_decode(api_call('/execution/tradeHistory'), true); ?>
+
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>Symbol</th>
+										<th>Qty</th>
+										<th>Exec Qty</th>
+										<th>Remaining</th>
+										<th>Exec Price</th>
+										<th>Price</th>
+										<th>Value</th>
+										<th>Type</th>
+										<th>OrderID</th>
+										<th>Time</th>
+									</tr>
+									<tbody>
+										
+									<?php 
+										foreach ($fills as $fill) { 
+											if(!empty($fill["side"])) { ?>
+											<tr data-order-type="<?php echo $fill["side"]; ?>">
+												<td><?php echo $fill["symbol"]; ?></td>
+												<td><?php echo $fill["orderQty"]; ?></td>
+												<td><?php echo $fill["lastQty"]; ?></td>
+												<td><?php echo $fill["simpleLeavesQty"]; ?></td>
+												<td><?php echo $fill["price"]; ?></td>
+												<td>
+													<?php 
+														if ($fill["ordType"] == "Market") {
+															echo "Market";
+														} else {
+															echo $fill["price"];
+														}
+
+													?>
+														
+												</td>
+												<td><?php echo $fill["foreignNotional"]; ?> XBT</td>
+												<td><?php echo $fill["ordType"]; ?></td>
+												<td><?php echo substr($fill["orderID"],0,7); ?></td>
+												<td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>
+											</tr>
+											<?php }
+											}
+									?>
+									</tbody>
+								</thead>
+							</table>
+
+
+							<?php 
+								echo "<pre>";
+								print_r($fills);
+								echo "</pre>";
+							 ?>
+						</div>
+					</div>
+					<div class="tab-pane fade" id="order_history">
+						<div class="order_history_inner">
+							<?php //api_call('/position'); ?>
+						</div>
+					</div>
 				</div>
 				<br>
 
