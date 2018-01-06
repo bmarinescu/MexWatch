@@ -87,6 +87,11 @@
 
 			body { overflow-y: scroll; }
 			
+			.refresh_btn { border: 1px solid transparent !important; background: none !important; opacity: 0.8; transition: opacity 300ms, transform 500ms ease-in-out; cursor: pointer;
+				display: inline-block; padding: 10px 15px; }
+			.refresh_btn:hover { opacity: 1; transform: rotate(360deg); }
+			.positions_tab_inner { opacity: 0; transition: opacity 600ms ease-out; }
+			.positions_tab_inner.loaded { opacity: 1; }
 		</style>
 	</head>
 	<body>
@@ -99,6 +104,7 @@
 					<li><a href="#stops" data-toggle="tab">Stops</a></li>
 					<li><a href="#fills" data-toggle="tab">Fills</a></li>
 					<li><a href="#order_history" data-toggle="tab">Order History</a></li>
+					<li><span class="refresh_btn"><i class="fa fa-refresh text-success"></i></span></li>
 				</ul>
 				<div id="myTabContent" class="tab-content">
 					<div class="tab-pane fade in active" id="positions_tab">
@@ -235,27 +241,21 @@
 						</div>
 					</div>
 				</div>
-				<br>
-
-				<?php 
-					// echo "<div class='contain-pre'>";
-					// print_r(api_call('/position'));
-					// echo "</div>";
-					
-					// echo "<pre>";
-					// $execution = json_decode(api_call('/execution'), true);
-					// print_r($execution);
-					// echo "</pre>";
-				?>
+				<!-- <br> -->
 			</div>
 		</div>
 		<script>
 			$(function() {
-				
+				$(".positions_tab_inner").addClass("loaded");
 				// curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
-
+				$('.refresh_btn').click(function(ev) {
+					ev.preventDefault();
+					$(".positions_tab_inner").removeClass("loaded");
+					setTimeout(function() { 
+						location.reload(); 
+					}, 500);
+				});
 			});
-				
 		</script>
 	</body>
 </html>
