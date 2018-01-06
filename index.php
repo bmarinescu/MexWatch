@@ -90,8 +90,8 @@
 			.refresh_btn { border: 1px solid transparent !important; background: none !important; opacity: 0.8; transition: opacity 300ms, transform 500ms ease-in-out; cursor: pointer;
 				display: inline-block; padding: 10px 15px; }
 			.refresh_btn:hover { opacity: 1; transform: rotate(360deg); }
-			.positions_tab_inner { opacity: 0; transition: opacity 600ms ease-out; }
-			.positions_tab_inner.loaded { opacity: 1; }
+			.tab_inner { opacity: 0; transition: opacity 600ms ease-out; }
+			.loaded .tab_inner { opacity: 1; }
 		</style>
 	</head>
 	<body>
@@ -108,7 +108,7 @@
 				</ul>
 				<div id="myTabContent" class="tab-content">
 					<div class="tab-pane fade in active" id="positions_tab">
-						<div class="positions_tab_inner">
+						<div class="positions_tab_inner tab_inner">
 							<?php 
 								$positions = json_decode(api_call('/position'), true);
 
@@ -161,22 +161,22 @@
 						</div>
 					</div>
 					<div class="tab-pane fade" id="closed_positions_tab">
-						<div class="closed_positions_tab_inner">
+						<div class="closed_positions_tab_inner tab_inner">
 							<?php //api_call('/position'); ?>
 						</div>
 					</div>
 					<div class="tab-pane fade" id="active_orders_tab">
-						<div class="active_orders_tab_inner">
+						<div class="active_orders_tab_inner tab_inner">
 							<?php //api_call('/position'); ?>
 						</div>
 					</div>
 					<div class="tab-pane fade" id="stops">
-						<div class="stops_inner">
+						<div class="stops_tab_inner tab_inner">
 							<?php //api_call('/position'); ?>
 						</div>
 					</div>
 					<div class="tab-pane fade" id="fills">
-						<div class="fills_inner">
+						<div class="fills_inner tab_inner">
 							<?php $fills = json_decode(api_call('/execution/tradeHistory'), true); ?>
 
 							<table class="table table-striped">
@@ -246,11 +246,11 @@
 		</div>
 		<script>
 			$(function() {
-				$(".positions_tab_inner").addClass("loaded");
+				$("body").addClass("loaded");
 				// curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
 				$('.refresh_btn').click(function(ev) {
 					ev.preventDefault();
-					$(".positions_tab_inner").removeClass("loaded");
+					$("body").removeClass("loaded");
 					setTimeout(function() { 
 						location.reload(); 
 					}, 500);
