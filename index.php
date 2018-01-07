@@ -136,9 +136,9 @@
 											<tr>
 												<td><?php echo $position["symbol"]; ?></td>
 												<td><?php echo $position["currentQty"]; ?></td>
-												<td><?php echo (-1)*$position["homeNotional"]; ?> <?php echo $position["underlying"]; ?></td>
+												<td><?php echo $position["currentQty"] * $position["markPrice"] . "XBT"; ?></td>
 												<td><?php echo $position["avgEntryPrice"]; ?></td>
-												<td><?php echo $position["lastPrice"]; ?></td>
+												<td><?php echo $position["markPrice"]; ?></td>
 												<td><?php echo $position["liquidationPrice"]; ?></td>
 												<td><?php echo round($position["maintMargin"]/$satoshis_per_btc, 2) . ($position["crossMargin"] == "1" ? " (Cross)" : ""); ?></td>
 												<td>
