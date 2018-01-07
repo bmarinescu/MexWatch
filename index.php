@@ -1,9 +1,9 @@
 <?php 
 
 	function api_call($url, $method = 'GET', $data = []) {
-		$apiKey = 'kuKCNxKcyd0jKRPG3fRxAUFk';
-		$apiSecret = 'aUY4oUm5zhCTbQAsayM7iwwsiuKvgIpuXU-MaRI15hL5Daih'; 
-		$apiUrl = 'https://www.bitmex.com/api/v1';
+		$apiKey = '4YFgfRe713-feq7ovWHtl_da';
+		$apiSecret = 'SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m'; 
+		$apiUrl = 'https://www.bitmex.com';
 
 		// $priv = $_GET['priv'];
 		// $pub = $_GET["pub"];
@@ -26,7 +26,7 @@
 
 		$c = curl_init();
 		curl_setopt_array($c, [
-			CURLOPT_URL => 'https://testnet.bitmex.com'.$path,
+			CURLOPT_URL => $apiUrl.$path,  //dfgdsfgsdgsdfgsdfgsdfg
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_RETURNTRANSFER => true,
@@ -131,6 +131,7 @@
 									<tbody>
 										
 									<?php 
+										$satoshis_per_btc = 100000000;
 										foreach ($positions as $position) { ?>
 											<tr>
 												<td><?php echo $position["symbol"]; ?></td>
@@ -139,12 +140,12 @@
 												<td><?php echo $position["avgEntryPrice"]; ?></td>
 												<td><?php echo $position["lastPrice"]; ?></td>
 												<td><?php echo $position["liquidationPrice"]; ?></td>
-												<td><?php echo $position["crossMargin"]; ?></td>
+												<td><?php echo round($position["maintMargin"]/$satoshis_per_btc, 2) . ($position["crossMargin"] == "1" ? " (Cross)" : ""); ?></td>
 												<td>
-													<?php echo $position["simplePnl"]; ?> XBT
+													<?php echo round($position["simplePnl"],4); ?> XBT
 													<?php //echo $position["unrealisedRoePcnt"]*100 . "%"; ?>
 												</td>
-												<td><?php echo $position["realisedGrossPnl"]; ?> XBT</td>
+												<td><?php echo round($position["rebalancedPnl"]/$satoshis_per_btc, 4); ?> XBT</td>
 											</tr>
 										<?php }
 									?>
