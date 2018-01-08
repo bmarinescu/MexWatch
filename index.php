@@ -145,7 +145,7 @@
 													<?php echo round($position["simplePnl"],4); ?> XBT
 													<?php //echo $position["unrealisedRoePcnt"]*100 . "%"; ?>
 												</td>
-												<td><?php echo round($position["rebalancedPnl"]/$satoshis_per_btc, 4); ?> XBT</td>
+												<td><?php echo round(($position["rebalancedPnl"]+$position["realisedPnl"])/$satoshis_per_btc, 4); ?> XBT</td>
 											</tr>
 										<?php }
 									?>
