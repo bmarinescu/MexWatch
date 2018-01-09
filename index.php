@@ -22,11 +22,15 @@
 		$path = '/api/v1'.$url;
 		$expires = (time()+60) ; // 1 min in the future
 
-		$signature = hash_hmac('sha256', $verb.$path.$expires, $apiSecret);
+		$data_url = "?".http_build_query($data, '', '&amp;');
+		// echo "<pre>";
+		// print_r($data_url);
+		// echo "</pre>";
+		$signature = hash_hmac('sha256', $verb.$path.$data_url.$expires, $apiSecret);
 
 		$c = curl_init();
 		curl_setopt_array($c, [
-			CURLOPT_URL => $apiUrl.$path,  //dfgdsfgsdgsdfgsdfgsdfg
+			CURLOPT_URL => $apiUrl.$path.$data_url,  //dfgdsfgsdgsdfgsdfgsdfg
 			CURLOPT_SSL_VERIFYPEER => 0,
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_RETURNTRANSFER => true,
@@ -35,7 +39,7 @@
 				'api-expires: '.$expires,
 				'api-key: '.$apiKey,
 				'api-signature: '.$signature
-			]
+			],
 		]);
 
 		$response = curl_exec($c);
@@ -44,7 +48,12 @@
 	}
 
 
-	
+	function textToColor($str) {
+	  $code = dechex(crc32($str));
+	  $code = substr($code, 0, 6);
+	  return $code;
+	}
+
 ?>
 <!DOCTYPE html>
 <html lang="en-US">
@@ -78,7 +87,7 @@
 			a:active { text-decoration: none; }
 			a:hover { color: #7CFFDE !important; }
 			body { font-size: 16px; }
-			.main { padding-top: 3em; }
+			.main { padding-top: 3em; position: relative; }
 			.tab-pane { padding-top: 15px; }
 			#tabs_main + .panel-group .panel-heading { padding: 0; }
 			#tabs_main + .panel-group .panel-heading a { padding: 10px 15px; display: block; }
@@ -86,6 +95,10 @@
 			tr[data-order-type="Sell"] td:first-child	{ border-left: 4px solid #ff0000 !important; }
 			tr[data-order-type="Buy"] td:first-child	{ border-left: 4px solid #00ff00 !important; }
 
+
+			tr[data-order-type="Sell"] td:nth-child(2)		{ color: #ff0000; }
+			tr[data-order-type="Buy"] td:nth-child(2)		{ color: #00ff00; }
+			td { white-space: nowrap; }
 			body { overflow-y: scroll; }
 			
 			.refresh_btn { border: 1px solid transparent !important; background: none !important; opacity: 0.8; transition: opacity 300ms, transform 500ms ease-in-out; cursor: pointer;
@@ -93,10 +106,20 @@
 			.refresh_btn:hover { opacity: 1; transform: rotate(360deg); }
 			.tab_inner { opacity: 0; transition: opacity 600ms ease-out; }
 			.loaded .tab_inner { opacity: 1; }
+
+			.corner_balance { position: absolute; right: 5px; top: 5px; display: inline-block; font-size: 16px; font-weight: bold;
+				color: #f39c12; }
 		</style>
 	</head>
 	<body>
 		<div class="main">
+			<div class="corner_balance">
+				<?php $wallet_data = json_decode(api_call('/user/wallet'), true); ?>
+				<span title="Total balance"><?php echo round($wallet_data["amount"]/100000000,3); ?> BTC</span>
+			</div>
+			<!-- <pre> -->
+				<?php //print_r($wallet_data); ?>
+			<!-- </pre> -->
 			<div class="container">
 				<ul id="tabs_main" class="nav nav-tabs">
 					<li class="active"><a href="#positions_tab" data-toggle="tab">Positions</a></li>
@@ -179,7 +202,9 @@
 					</div>
 					<div class="tab-pane fade" id="fills">
 						<div class="fills_inner tab_inner">
-							<?php $fills = json_decode(api_call('/execution/tradeHistory'), true); ?>
+							<?php $fills = json_decode(api_call('/execution/tradeHistory',"GET", [
+								'reverse' => true
+								]), true); ?>
 
 							<table class="table table-striped">
 								<thead>
@@ -219,7 +244,7 @@
 												</td>
 												<td><?php echo $fill["foreignNotional"]; ?> XBT</td>
 												<td><?php echo $fill["ordType"]; ?></td>
-												<td><?php echo substr($fill["orderID"],0,7); ?></td>
+												<td <?php $ord_ID = substr($fill["orderID"],0,7); ?> style="color: #<?php echo textToColor($ord_ID); ?>"><?php echo $ord_ID; ?></td>
 												<td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>
 											</tr>
 											<?php }
@@ -258,6 +283,24 @@
 					}, 500);
 				});
 			});
+
+
+			$('#tabs_main a').click(function(e) {
+			  e.preventDefault();
+			  $(this).tab('show');
+			});
+
+			// store the currently selected tab in the hash value
+			$("ul.nav-tabs > li > a").on("shown.bs.tab", function(e) {
+				var id = $(e.target).attr("href").substr(1);
+				window.location.hash = id;
+				window.scrollTo(0, 0);
+			});
+
+			// on load of the page: switch to the currently selected tab
+			var hash = window.location.hash;
+			$('#tabs_main a[href="' + hash + '"]').tab('show');
+			
 		</script>
 	</body>
 </html>
