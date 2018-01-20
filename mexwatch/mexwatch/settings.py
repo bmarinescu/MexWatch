@@ -25,7 +25,7 @@ SECRET_KEY = 'qdh-1q-a)_(wjlzsa*xvsl8y2(pi*7_i_yr&tbdiue)loe94dv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["ward.go.ro","localhost","127.0.0.1"]
+ALLOWED_HOSTS = ["ward.go.ro","localhost","127.0.0.1","0.0.0.0"]
 
 
 # Application definition
