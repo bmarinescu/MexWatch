@@ -60,3 +60,110 @@ body {
   padding: 0;
   list-style: none;
 }
+
+
+	.contain-pre {
+			max-width: 100%;
+			overflow-y: scroll;
+			display: block;
+		}
+
+		a {
+			transition: all 300ms;
+		}
+
+		a:focus,
+		a:hover,
+		a:active {
+			text-decoration: none;
+		}
+
+		a:hover {
+			color: #7CFFDE !important;
+		}
+
+		body {
+			font-size: 16px;
+		}
+
+		.main {
+			padding-top: 3em;
+			position: relative;
+		}
+
+		.tab-pane {
+			padding-top: 15px;
+		}
+
+		#tabs_main + .panel-group .panel-heading {
+			padding: 0;
+		}
+
+		#tabs_main + .panel-group .panel-heading a {
+			padding: 10px 15px;
+			display: block;
+		}
+
+		tr[data-order-type="Sell"] td:first-child {
+			border-left: 4px solid #ff0000 !important;
+		}
+
+		tr[data-order-type="Buy"] td:first-child {
+			border-left: 4px solid #00ff00 !important;
+		}
+
+		tr[data-order-type="Sell"] td:nth-child(2) {
+			color: #ff0000;
+		}
+
+		tr[data-order-type="Buy"] td:nth-child(2) {
+			color: #00ff00;
+		}
+
+		td {
+			white-space: nowrap;
+		}
+
+		body {
+			overflow-y: scroll;
+		}
+
+		.refresh_btn {
+			border: 1px solid transparent !important;
+			background: none !important;
+			opacity: 0.8;
+			transition: opacity 300ms, transform 500ms ease-in-out;
+			cursor: pointer;
+			display: inline-block;
+			padding: 10px 15px;
+		}
+
+		.refresh_btn:hover {
+			opacity: 1;
+			transform: rotate(360deg);
+		}
+
+		.tab_inner {
+			opacity: 0;
+			transition: opacity 600ms ease-out;
+		}
+
+		.loaded .tab_inner {
+			opacity: 1;
+		}
+
+		.corner_balance {
+			position: absolute;
+			right: 5px;
+			top: 5px;
+			display: inline-block;
+			font-size: 16px;
+			font-weight: bold;
+			color: #f39c12;
+		}
+        .toggle-sidebar-contain {
+            position: absolute;
+			left: 5px;
+			top: 5px;
+			display: inline-block;
+        }
