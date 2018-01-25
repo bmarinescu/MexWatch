@@ -3,25 +3,25 @@
 {% load static %}
 <html lang="en-US">
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="robots" content="noindex, nofollow">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Bitmex Watcher</title>
-	<link rel="icon" type="image/png" href="{% static 'core/icon.png' %}"/>
-	<!-- Bootstrap CSS -->
-	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" href="{% static 'core/darkly.css' %}">
-   	<link rel="stylesheet" href="{% static 'core/mini.css' %}">
-	<link rel="stylesheet" href="{% static 'core/style.css' %}">
-	<!-- jQuery -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-	<!-- Bootstrap JavaScript -->
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-	<!--[if lt IE 9]>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bitmex Watcher</title>
+    <link rel="icon" type="image/png" href="{% static 'core/icon.png' %}"/>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{% static 'core/darkly.css' %}">
+    <link rel="stylesheet" href="{% static 'core/mini.css' %}">
+    <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <!-- Bootstrap JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
 			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 		<![endif]-->
@@ -30,11 +30,12 @@
 
 <div class="main toggled">
     <div id="sidebar-wrapper">
-    	<a class="btn btn-sm btn-success" data-toggle="modal" href='#add_key_modal'><i class="fa fa-plus"></i>&nbsp;Add keypair</a>
-    	<hr>
+        <a class="btn btn-sm btn-success" data-toggle="modal" href='#add_key_modal'><i class="fa fa-plus"></i>&nbsp;Add
+            keypair</a>
+        <hr>
         <ul class="sidebar-nav nav nav-pills nav-stacked">
             {% for u in users %}
-                <li  class="active"><a href="#">{{u.name}}</a></li>
+                <li class="active"><a href="#">{{ u.name }}</a></li>
             {% endfor %}
         </ul>
 
@@ -43,37 +44,37 @@
 		<span class="btn btn-danger btn-sm" id="menu-toggle">
 			<i class="fa fa-bars"></i>
 		</span>
-	</div>
-	<div class="corner_balance">
-		<?php $wallet_data = json_decode(api_call('/user/wallet'), true); ?>
-		<span title="Total balance"><?php echo round($wallet_data["amount"]/100000000,3); ?> BTC</span>
-	</div>
-	<div class="container">
-		<ul id="tabs_main" class="nav nav-tabs">
-			<li class="active"><a href="#positions_tab" data-toggle="tab">Positions</a></li>
-			<li><a href="#closed_positions_tab" data-toggle="tab">Closed Positions</a></li>
-			<li><a href="#active_orders_tab" data-toggle="tab">Active Orders</a></li>
-			<li><a href="#stops" data-toggle="tab">Stops</a></li>
-			<li><a href="#fills" data-toggle="tab">Fills</a></li>
-			<li><a href="#order_history" data-toggle="tab">Order History</a></li>
-			<li><span class="refresh_btn"><i class="fa fa-refresh text-success"></i></span></li>
-		</ul>
-		<div id="myTabContent" class="tab-content">
-			<div class="tab-pane fade in active" id="positions_tab">
-				<div class="positions_tab_inner tab_inner">
-					<table class="table table-striped">
-						<thead>
-							<tr>
-								<th>Symbol</th>
-								<th>Size</th>
-								<th>Value</th>
-								<th>Entry Price</th>
-								<th>Mark Price</th>
-								<th>Liq. Price</th>
-								<th>Margin</th>
-								<th>Unrealised PNL<!--  (ROE %) --></th>
-								<th>Realised PNL</th>
-							</tr>
+    </div>
+    <div class="corner_balance">
+        <?php $wallet_data = json_decode(api_call('/user/wallet'), true); ?>
+        <span title="Total balance"><?php echo round($wallet_data["amount"]/100000000,3); ?> BTC</span>
+    </div>
+    <div class="container">
+        <ul id="tabs_main" class="nav nav-tabs">
+            <li class="active"><a href="#positions_tab" data-toggle="tab">Positions</a></li>
+            <li><a href="#closed_positions_tab" data-toggle="tab">Closed Positions</a></li>
+            <li><a href="#active_orders_tab" data-toggle="tab">Active Orders</a></li>
+            <li><a href="#stops" data-toggle="tab">Stops</a></li>
+            <li><a href="#fills" data-toggle="tab">Fills</a></li>
+            <li><a href="#order_history" data-toggle="tab">Order History</a></li>
+            <li><span class="refresh_btn"><i class="fa fa-refresh text-success"></i></span></li>
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade in active" id="positions_tab">
+                <div class="positions_tab_inner tab_inner">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Size</th>
+                            <th>Value</th>
+                            <th>Entry Price</th>
+                            <th>Mark Price</th>
+                            <th>Liq. Price</th>
+                            <th>Margin</th>
+                            <th>Unrealised PNL<!--  (ROE %) --></th>
+                            <th>Realised PNL</th>
+                        </tr>
                         </thead>
                         <tbody>
                         {% for position in positions %}
@@ -93,182 +94,222 @@
                         {% endfor %}
 
                         </tbody>
-					</table>
-				</div>
+                    </table>
+                </div>
                 <pre>
                     {{ positionsDump }}
                 </pre>
-			</div>
-			<div class="tab-pane fade" id="closed_positions_tab">
-				<div class="closed_positions_tab_inner tab_inner">
+            </div>
+            <div class="tab-pane fade" id="closed_positions_tab">
+                <div class="closed_positions_tab_inner tab_inner">
 
-				</div>
-			</div>
-			<div class="tab-pane fade" id="active_orders_tab">
-				<div class="active_orders_tab_inner tab_inner">
+                </div>
+                <pre>
+                    {{ orderDump }}
+                </pre>
+            </div>
+            <div class="tab-pane fade" id="active_orders_tab">
+                <div class="active_orders_tab_inner tab_inner">
 
-				</div>
-			</div>
-			<div class="tab-pane fade" id="stops">
-				<div class="stops_tab_inner tab_inner">
+                </div>
+                <pre>
+                    {{ orderDump }}
+                </pre>
+            </div>
+            <div class="tab-pane fade" id="stops">
+                <div class="stops_tab_inner tab_inner">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Filled</th>
+                            <th>Stop Price</th>
+                            <th>Triggering Price</th>
+                            <th>Fill Price</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in stops %}
+                            <tr>
+                                <td>{{ s.symbol }}</td>
+                                <td>{{ s.orderQty }}</td>
+                                <td>{{ s.price }}</td>
+                                <td>{{ s.filled }}</td>
+                                <td>{{ s.stopPx }}</td>
+                                <td>{{ s.triggeringPrice }}</td>
+                                <td>{{ s.fillPrice }}</td>
+                                <td>{{ s.type }}</td>
+                                <td>{{ s.status }}</td>
+                                <td>{{ s.time }}</td>
+                            </tr>
+                        {% endfor %}
 
-				</div>
-			</div>
-			<div class="tab-pane fade" id="fills">
-				<div class="fills_inner tab_inner">
-					<table class="table table-striped">
-						<thead>
-						<tr>
-							<th>Symbol</th>
-							<th>Qty</th>
-							<th>Exec Qty</th>
-							<th>Remaining</th>
-							<th>Exec Price</th>
-							<th>Price</th>
-							<th>Value</th>
-							<th>Type</th>
-							<th>OrderID</th>
-{#                            <th>Time</th>#}
-						</tr>
-						</thead>
-						<tbody>
-						{% for fill in fills %}
-							{% if fill.side %}
-								<tr data-order-type="{{ fill.side }}">
-									<td>{{ fill.symbol }}</td>
-									<td>{{ fill.orderQty }}</td>
-									<td>{{ fill.lastQty }}</td>
-									<td>{{ fill.simpleLeavesQty }}</td>
-									<td>{{ fill.price }}</td>
-									<td>
-										{% ifequal fill.ordType "Market" %}
-											"Market"
-										{% else %}
-											{{ fill.price }}
-										{% endifequal %}
-									</td>
-									<td>{{ fill.foreignNotional }} XBT</td>
-									<td>{{ fill.ordType }}</td>
-									<td style="color: #00ff00;">{{ fill.ord_ID }}</td>
-{#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
-								</tr>
-							{% endif %}
-						{% endfor %}
-						</tbody>
-					</table>
-				</div>
+                        </tbody>
+                    </table>
+                </div>
+                <pre>
+                    {{ stopsDump }}
+                </pre>
+            </div>
+            <div class="tab-pane fade" id="fills">
+                <div class="fills_inner tab_inner">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Qty</th>
+                            <th>Exec Qty</th>
+                            <th>Remaining</th>
+                            <th>Exec Price</th>
+                            <th>Price</th>
+                            <th>Value</th>
+                            <th>Type</th>
+                            <th>OrderID</th>
+                            {#                            <th>Time</th>#}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for fill in fills %}
+                            {% if fill.side %}
+                                <tr data-order-type="{{ fill.side }}">
+                                    <td>{{ fill.symbol }}</td>
+                                    <td>{{ fill.orderQty }}</td>
+                                    <td>{{ fill.lastQty }}</td>
+                                    <td>{{ fill.simpleLeavesQty }}</td>
+                                    <td>{{ fill.price }}</td>
+                                    <td>
+                                        {% ifequal fill.ordType "Market" %}
+                                            "Market"
+                                        {% else %}
+                                            {{ fill.price }}
+                                        {% endifequal %}
+                                    </td>
+                                    <td>{{ fill.foreignNotional }} XBT</td>
+                                    <td>{{ fill.ordType }}</td>
+                                    <td style="color: #00ff00;">{{ fill.ord_ID }}</td>
+                                    {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 <pre>
                     {{ fillsDump }}
                 </pre>
-			</div>
-			<div class="tab-pane fade" id="order_history">
-				<div class="order_history_inner">
+            </div>
+            <div class="tab-pane fade" id="order_history">
+                <div class="order_history_inner">
 
-				</div>
-			</div>
-		</div>
-		<!-- <br> -->
-	</div>
-	<div class="modal fade" id="add_key_modal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title">Add new keypair for public view</h4>
-				</div>
-				<form action="{% url "create_user" %}" method="post" id="form_create_user">
-					<div class="modal-body">
-						<div class="form-group">
-							<label for="key_name">Name</label>
-							<input type="text" class="form-control" id="key_name" name="key_name" placeholder="">
-						</div>
-						<div class="form-group">
-							<label for="key_pub">Public key</label>
-							<input type="text" class="form-control" id="key_pub" name="key_pub" placeholder="">
-						</div>
-						<div class="form-group">
-							<label for="key_secret">Secret key</label>
-							<input type="text" class="form-control" id="key_secret" name="key_secret" placeholder="">
-						</div>
-						<div class="form-group">
-							<div class="printArea text-success">
-							</div>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close</button>
-						<button type="submit" class="btn btn-default">Submit</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
+                </div>
+            </div>
+        </div>
+        <!-- <br> -->
+    </div>
+    <div class="modal fade" id="add_key_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Add new keypair for public view</h4>
+                </div>
+                <form action="{% url "create_user" %}" method="post" id="form_create_user">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="key_name">Name</label>
+                            <input type="text" class="form-control" id="key_name" name="key_name" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="key_pub">Public key</label>
+                            <input type="text" class="form-control" id="key_pub" name="key_pub" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <label for="key_secret">Secret key</label>
+                            <input type="text" class="form-control" id="key_secret" name="key_secret" placeholder="">
+                        </div>
+                        <div class="form-group">
+                            <div class="printArea text-success">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close</button>
+                        <button type="submit" class="btn btn-default">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 <script>
-	$(function () {
-		$("body").addClass("loaded");
-		// curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
-		$('.refresh_btn').click(function (ev) {
-			ev.preventDefault();
-			$("body").removeClass("loaded");
-			setTimeout(function () {
-				location.reload();
-			}, 500);
-		});
-		$("#form_create_use").modal("show");
+    $(function () {
+        $("body").addClass("loaded");
+        // curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
+        $('.refresh_btn').click(function (ev) {
+            ev.preventDefault();
+            $("body").removeClass("loaded");
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        });
+        $("#form_create_use").modal("show");
 
-		// ########################################################
-		// $('#add_key_modal').modal('show');
-		// ########################################################
-	});
-
-
-	$('#tabs_main a').click(function (e) {
-		e.preventDefault();
-		$(this).tab('show');
-	});
-
-	// store the currently selected tab in the hash value
-	$("ul.nav-tabs > li > a").on("shown.bs.tab", function (e) {
-		var id = $(e.target).attr("href").substr(1);
-		window.location.hash = id;
-		window.scrollTo(0, 0);
-	});
-
-	// on load of the page: switch to the currently selected tab
-	var hash = window.location.hash;
-	$('#tabs_main a[href="' + hash + '"]').tab('show');
+        // ########################################################
+        // $('#add_key_modal').modal('show');
+        // ########################################################
+    });
 
 
-    $("#menu-toggle").click(function(e) {
+    $('#tabs_main a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    // store the currently selected tab in the hash value
+    $("ul.nav-tabs > li > a").on("shown.bs.tab", function (e) {
+        var id = $(e.target).attr("href").substr(1);
+        window.location.hash = id;
+        window.scrollTo(0, 0);
+    });
+
+    // on load of the page: switch to the currently selected tab
+    var hash = window.location.hash;
+    $('#tabs_main a[href="' + hash + '"]').tab('show');
+
+
+    $("#menu-toggle").click(function (e) {
         e.preventDefault();
         $(".main").toggleClass("toggled");
     });
     $('#add_key_modal').on('shown.bs.modal', function () {
-	    $('#key_name').focus();
-	})
+        $('#key_name').focus();
+    })
 
-	$('#form_create_user').on('submit',function(e){
-	    e.preventDefault();
-	    console.log('Sending request to '+$(this).attr('action')+' with data: '+$(this).serialize());
-	    $.ajax({
-	        type     : "POST",
-	        cache    : false,
-	        url      : $(this).attr('action'),
-	        data     : $(this).serialize(),
-	        success  : function(data) {
-	        	// console.log(data + " \n");
-	        	// console.log(success_msg + " \n");
+    $('#form_create_user').on('submit', function (e) {
+        e.preventDefault();
+        console.log('Sending request to ' + $(this).attr('action') + ' with data: ' + $(this).serialize());
+        $.ajax({
+            type: "POST",
+            cache: false,
+            url: $(this).attr('action'),
+            data: $(this).serialize(),
+            success: function (data) {
+                // console.log(data + " \n");
+                // console.log(success_msg + " \n");
 
-	            $(".printArea").empty().removeClass("text-success text-danger").addClass("text-success").append(data.message);
-	        },
-	        error: function (xhr, errmsg, err) {
-	        	err_msg = JSON.parse(xhr.responseText);
-	            $(".printArea").empty().removeClass("text-success text-danger").addClass("text-danger").append(err_msg.err);
-            }    
-		});
-	});
-
+                $(".printArea").empty().removeClass("text-success text-danger").addClass("text-success").append(data.message);
+            },
+            error: function (xhr, errmsg, err) {
+                err_msg = JSON.parse(xhr.responseText);
+                $(".printArea").empty().removeClass("text-success text-danger").addClass("text-danger").append(err_msg.err);
+            }
+        });
+    });
 
 
 </script>

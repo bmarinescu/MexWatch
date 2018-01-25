@@ -63,8 +63,9 @@ def get_err_response(status, message):
 # Create your views here.
 def frontpage(request):
     fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"})
-
     positions_json = call_bitmex_api('/position')
+    order_json = call_bitmex_api('/order', {"reverse": "true", "filter":'{"ordStatus":"New"}'})
+    stop_json = call_bitmex_api('/order', {"reverse": "true", "filter":'{"ordStatus":"New", "ordType":"Stop"}'})
 
     for p in positions_json:
         if p["isOpen"]:
@@ -72,12 +73,25 @@ def frontpage(request):
                                (" (Cross)", "")[p["crossMargin"] == "1"]
             p["unrealisedGrossPnl"] = round(p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
             p["realizedPnl"] = round((float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
-            p["value"] = p["currentQty"] * p["markPrice"]
+            if p["symbol"] == "XBTUSD":
+                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
+            else:
+                p["value"] = p["currentQty"] * p["markPrice"]
+
+    for s in stop_json:
+        if not s["price"]:
+            s["price"] = "Market"
+        if not s["triggered"]:
+            s["status"] = "Untriggered"
 
     return render(request, "core/index.html", {'fills': fills_json,
                                                'fillsDump': json.dumps(fills_json, indent=2),
                                                'positions': positions_json,
                                                'positionsDump': json.dumps(positions_json, indent=2),
+                                               'order': order_json,
+                                               'orderDump': json.dumps(order_json, indent=2),
+                                               'stops': stop_json,
+                                               'stopsDump': json.dumps(stop_json, indent=2),
                                                'users': User.objects.all()})
 
 @csrf_exempt
