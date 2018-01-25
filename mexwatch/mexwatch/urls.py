@@ -22,5 +22,6 @@ from core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.frontpage, name='frontpage'),
+    url(r'^u/(?P<username>.+)$', views.userpage, name='user'),
     url(r'^create_user/$', views.create_user, name='create_user'),
 ]

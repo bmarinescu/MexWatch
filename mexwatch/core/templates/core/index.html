@@ -35,7 +35,7 @@
         <hr>
         <ul class="sidebar-nav nav nav-pills nav-stacked">
             {% for u in users %}
-                <li class="active"><a href="#">{{ u.name }}</a></li>
+                <li class="active"><a href="{% url "user" u.name %}">{{ u.name }}</a></li>
             {% endfor %}
         </ul>
 
@@ -57,8 +57,10 @@
             <li><a href="#stops" data-toggle="tab">Stops</a></li>
             <li><a href="#fills" data-toggle="tab">Fills</a></li>
             <li><a href="#order_history" data-toggle="tab">Order History</a></li>
+            <li><a href="#info_tab" data-toggle="tab">Info</a></li>
             <li><span class="refresh_btn"><i class="fa fa-refresh text-success"></i></span></li>
         </ul>
+
         <div id="myTabContent" class="tab-content">
             <div class="tab-pane fade in active" id="positions_tab">
                 <div class="positions_tab_inner tab_inner">
@@ -166,7 +168,7 @@
                             <th>Exec Qty</th>
                             <th>Remaining</th>
                             <th>Exec Price</th>
-                            <th>Price</th>
+{#                            <th>Price</th>#}
                             <th>Value</th>
                             <th>Type</th>
                             <th>OrderID</th>
@@ -176,22 +178,23 @@
                         <tbody>
                         {% for fill in fills %}
                             {% if fill.side %}
-                                <tr data-order-type="{{ fill.side }}">
+                                <tr style="background-color: #{{ fill.idColor }}20" class="testtest" data-order-type="{{ fill.side }}">
                                     <td>{{ fill.symbol }}</td>
                                     <td>{{ fill.orderQty }}</td>
                                     <td>{{ fill.lastQty }}</td>
                                     <td>{{ fill.simpleLeavesQty }}</td>
-                                    <td>{{ fill.price }}</td>
-                                    <td>
-                                        {% ifequal fill.ordType "Market" %}
-                                            "Market"
-                                        {% else %}
-                                            {{ fill.price }}
-                                        {% endifequal %}
-                                    </td>
-                                    <td>{{ fill.foreignNotional }} XBT</td>
+                                    <td>{{ fill.lastPx }}</td>
+{#                                    <td>#}
+{#                                        {% ifequal fill.ordType "Market" %}#}
+{#                                            "Market"#}
+{#                                        {% else %}#}
+{#                                            {{ fill.price }}#}
+{#                                        {% endifequal %}#}
+{#                                    </td>#}
+                                    <td>{{ fill.value }} XBT</td>
                                     <td>{{ fill.ordType }}</td>
-                                    <td style="color: #00ff00;">{{ fill.ord_ID }}</td>
+                                    <td style="color: #{{ fill.idColor }};"><span
+                                            data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
                                 </tr>
                             {% endif %}
@@ -206,6 +209,11 @@
             <div class="tab-pane fade" id="order_history">
                 <div class="order_history_inner">
 
+                </div>
+            </div>
+            <div class="tab-pane fade in active" id="info_tab">
+                <div class="info_tab_inner tab_inner">
+                    <pre>{{ instruments }}</pre>
                 </div>
             </div>
         </div>

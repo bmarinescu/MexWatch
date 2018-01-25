@@ -7,9 +7,10 @@ import types
 import urllib.parse
 from pprint import pprint
 
+import zlib
 from django.contrib.sites import requests
 from django.http import Http404, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import requests
 from django.views.decorators.csrf import csrf_exempt
 
@@ -18,14 +19,18 @@ from core.models import User
 SATOSHIS_PER_BTC = 100000000
 
 
+def str_to_bytes(str):
+    b = bytearray()
+    b.extend(map(ord, str))
+    return b
+
+
 # noinspection PyDefaultArgument
 def call_bitmex_api(url, get_params={}, api_key='4YFgfRe713-feq7ovWHtl_da',
                     api_secret='SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m'):
     api_url = 'https://www.bitmex.com'
 
-    b = bytearray()
-    b.extend(map(ord, api_secret))
-    api_secret = b
+    secret_bytes = str_to_bytes(api_secret)
 
     verb = 'GET'
     path = '/api/v1' + url
@@ -35,7 +40,7 @@ def call_bitmex_api(url, get_params={}, api_key='4YFgfRe713-feq7ovWHtl_da',
     if len(get_params) > 0:
         data_url = "?" + urllib.parse.urlencode(get_params)
 
-    signature = hmac.new(b, str.encode(verb + path + data_url + str(expires)), hashlib.sha256).hexdigest()
+    signature = hmac.new(secret_bytes, str.encode(verb + path + data_url + str(expires)), hashlib.sha256).hexdigest()
 
     response = requests.get(api_url + path, get_params,
                             headers={'api-expires': str(expires),
@@ -61,38 +66,15 @@ def get_err_response(status, message):
 
 
 # Create your views here.
+def textToColor(text):
+    code = hex(zlib.crc32(str_to_bytes(text)))
+    code = code[2:8]
+    return code
+
+
 def frontpage(request):
-    fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"})
-    positions_json = call_bitmex_api('/position')
-    order_json = call_bitmex_api('/order', {"reverse": "true", "filter":'{"ordStatus":"New"}'})
-    stop_json = call_bitmex_api('/order', {"reverse": "true", "filter":'{"ordStatus":"New", "ordType":"Stop"}'})
+    return redirect("user", User.objects.first().name)
 
-    for p in positions_json:
-        if p["isOpen"]:
-            p['maintMargin'] = str(round(float(p["maintMargin"]) / SATOSHIS_PER_BTC, 2)) + \
-                               (" (Cross)", "")[p["crossMargin"] == "1"]
-            p["unrealisedGrossPnl"] = round(p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
-            p["realizedPnl"] = round((float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
-            if p["symbol"] == "XBTUSD":
-                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
-            else:
-                p["value"] = p["currentQty"] * p["markPrice"]
-
-    for s in stop_json:
-        if not s["price"]:
-            s["price"] = "Market"
-        if not s["triggered"]:
-            s["status"] = "Untriggered"
-
-    return render(request, "core/index.html", {'fills': fills_json,
-                                               'fillsDump': json.dumps(fills_json, indent=2),
-                                               'positions': positions_json,
-                                               'positionsDump': json.dumps(positions_json, indent=2),
-                                               'order': order_json,
-                                               'orderDump': json.dumps(order_json, indent=2),
-                                               'stops': stop_json,
-                                               'stopsDump': json.dumps(stop_json, indent=2),
-                                               'users': User.objects.all()})
 
 @csrf_exempt
 def create_user(request):
@@ -128,13 +110,70 @@ def create_user(request):
         )
     else:
         assert existing_user_query.count() == 1
-        existing_user : User = existing_user_query.first()
+        existing_user: User = existing_user_query.first()
         existing_user.name = name
         existing_user.save()
-
 
         return HttpResponse(
             '{"message" : "Display name has been replaced"}',
             content_type="application/json",
             status=200
         )
+
+
+def userpage(request, username):
+    user_filter = User.objects.filter(name=username)
+    if user_filter.count() == 0:
+        return Http404()
+
+    user: User = user_filter.first()
+
+    positions_json = call_bitmex_api('/position', api_key=user.key_pub, api_secret=user.key_secret)
+
+    if 'error' in positions_json:
+        user.delete()
+        return Http404()
+
+    fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"}, api_key=user.key_pub, api_secret=user.key_secret)
+    order_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New"}'}, api_key=user.key_pub, api_secret=user.key_secret)
+    stop_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New", "ordType":"Stop"}'}, api_key=user.key_pub, api_secret=user.key_secret)
+    instruments = call_bitmex_api('/instrument/indices', {"filter": '{"symbol":"."}'}, api_key=user.key_pub, api_secret=user.key_secret)
+
+    for p in positions_json:
+        if p["isOpen"]:
+            p['maintMargin'] = str(round(float(p["maintMargin"]) / SATOSHIS_PER_BTC, 2)) + \
+                               (" (Cross)", "")[p["crossMargin"] == "1"]
+            p["unrealisedGrossPnl"] = round(p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
+            p["realizedPnl"] = round((float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
+            if p["symbol"] == "XBTUSD":
+                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
+            else:
+                p["value"] = p["currentQty"] * p["markPrice"]
+            p["value"] = round(p["value"], 4)
+
+
+    for s in stop_json:
+        if not s["price"]:
+            s["price"] = "Market"
+        if not s["triggered"]:
+            s["status"] = "Untriggered"
+
+    for f in fills_json:
+        f["shortId"] = f["orderID"][0:7]
+        f["idColor"] = textToColor(f["orderID"])
+        if f["symbol"][0:6] == "XBTUSD":
+            f["value"] = str(f["orderQty"] / f["price"])[0:6]
+        else:
+            f["value"] = str(f["lastPx"] * f["orderQty"])[0:6]
+
+    return render(request, "core/index.html", {'fills': fills_json,
+                                               'fillsDump': json.dumps(fills_json, indent=2),
+                                               'positions': positions_json,
+                                               'positionsDump': json.dumps(positions_json, indent=2),
+                                               'order': order_json,
+                                               'orderDump': json.dumps(order_json, indent=2),
+                                               'stops': stop_json,
+                                               'stopsDump': json.dumps(stop_json, indent=2),
+                                               'users': User.objects.all(),
+                                               'instruments': json.dumps(instruments, indent=2),
+                                               })
