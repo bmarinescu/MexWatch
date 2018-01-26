@@ -73,13 +73,15 @@ def textToColor(text):
 
 
 def frontpage(request):
+    if User.objects.count() == 0:
+        User.objects.create(name="benis",key_pub="4YFgfRe713-feq7ovWHtl_da", key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m")
     return redirect("user", User.objects.first().name)
 
 
 @csrf_exempt
 def create_user(request):
     if request.method != "POST":
-        raise Http404
+        raise Http404()
 
     try:
         name = request.POST["key_name"]
@@ -124,7 +126,7 @@ def create_user(request):
 def userpage(request, username):
     user_filter = User.objects.filter(name=username)
     if user_filter.count() == 0:
-        return Http404()
+        raise Http404()
 
     user: User = user_filter.first()
 
@@ -132,7 +134,7 @@ def userpage(request, username):
 
     if 'error' in positions_json:
         user.delete()
-        return Http404()
+        raise Http404()
 
     fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"}, api_key=user.key_pub, api_secret=user.key_secret)
     order_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New"}'}, api_key=user.key_pub, api_secret=user.key_secret)
