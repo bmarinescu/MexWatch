@@ -28,16 +28,29 @@
 </head>
 <body>
 
-<div class="main toggled">
+<div class="main tog2gled">
     <div id="sidebar-wrapper">
         <a class="btn btn-sm btn-success" data-toggle="modal" href='#add_key_modal'><i class="fa fa-plus"></i>&nbsp;Add
             keypair</a>
         <hr>
-        <ul class="sidebar-nav nav nav-pills nav-stacked">
-            {% for u in users %}
-                <li class="active"><a href="{% url "user" u.name %}">{{ u.name }}</a></li>
-            {% endfor %}
-        </ul>
+        <table class="table table-users">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Balance</th>
+                        <th>Positions Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                        <tr class="active-user">
+                            <td><a href="{% url "user" u.name %}">{{ u.name }}</a></td>
+                            <td>{{ u.wallet.amount }}</td>
+                            <td>{{ u.total_positions_value }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+        </table>
 
     </div>
     <div class="toggle-sidebar-contain">
@@ -46,9 +59,13 @@
 		</span>
     </div>
     <div class="corner_balance">
-        <?php $wallet_data = json_decode(api_call('/user/wallet'), true); ?>
-        <span title="Total balance"><?php echo round($wallet_data["amount"]/100000000,3); ?> BTC</span>
+        <span title="Total balance">{{ wallet.amount }} BTC</span>
     </div>
+{#    <div class="container">#}
+{#        <pre>#}
+{#            {{ walletDump }}#}
+{#        </pre>#}
+{#    </div>#}
     <div class="container">
         <ul id="tabs_main" class="nav nav-tabs">
             <li class="active"><a href="#positions_tab" data-toggle="tab">Positions</a></li>
@@ -76,12 +93,13 @@
                             <th>Margin</th>
                             <th>Unrealised PNL<!--  (ROE %) --></th>
                             <th>Realised PNL</th>
+                            <th>Time</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for position in positions %}
                             {% ifequal position.isOpen 1 %}
-                                <tr>
+                                <tr data-order-type="{{ position.side }}">
                                     <td>{{ position.symbol }}</td>
                                     <td>{{ position.currentQty }}</td>
                                     <td>{{ position.value }} XBT</td>
@@ -91,6 +109,7 @@
                                     <td>{{ position.maintMargin }}</td>
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
+                                    <th>{{ position.timestamp }}</th>
                                 </tr>
                             {% endifequal %}
                         {% endfor %}
@@ -112,7 +131,36 @@
             </div>
             <div class="tab-pane fade" id="active_orders_tab">
                 <div class="active_orders_tab_inner tab_inner">
-
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <td>Symbol</td>
+                            <td>Qty</td>
+                            <td>Price</td>
+                            <td>Filled</td>
+                            <td>Remaining</td>
+                            <td>Order Value</td>
+                            <td>Type</td>
+                            <td>Status</td>
+                            <td>Time</td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for o in orders %}
+                            <tr data-order-type="{{ o.side }}">
+                                <td>{{ o.symbol }}</td>
+                                <td>{{ o.orderQty }}</td>
+                                <td>{{ o.price }}</td>
+                                <td>{{ o.cumQty }}</td>
+                                <td>{{ o.leavesQty }}</td>
+                                <td>{{ o.value }} XBT</td>
+                                <td>{{ o.ordType }}</td>
+                                <td>{{ o.ordStatus }}</td>
+                                <td>{{ o.timestamp }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
                 <pre>
                     {{ orderDump }}
@@ -147,7 +195,7 @@
                                 <td>{{ s.fillPrice }}</td>
                                 <td>{{ s.type }}</td>
                                 <td>{{ s.status }}</td>
-                                <td>{{ s.time }}</td>
+                                <td>{{ s.timestamp }}</td>
                             </tr>
                         {% endfor %}
 
@@ -168,34 +216,36 @@
                             <th>Exec Qty</th>
                             <th>Remaining</th>
                             <th>Exec Price</th>
-{#                            <th>Price</th>#}
+                            {#                            <th>Price</th>#}
                             <th>Value</th>
                             <th>Type</th>
                             <th>OrderID</th>
-                            {#                            <th>Time</th>#}
+                            <th>Time</th>
                         </tr>
                         </thead>
                         <tbody>
                         {% for fill in fills %}
                             {% if fill.side %}
-                                <tr style="background-color: #{{ fill.idColor }}20" class="testtest" data-order-type="{{ fill.side }}">
+                                <tr style="background-color: #{{ fill.idColor }}20" class="testtest"
+                                    data-order-type="{{ fill.side }}">
                                     <td>{{ fill.symbol }}</td>
                                     <td>{{ fill.orderQty }}</td>
                                     <td>{{ fill.lastQty }}</td>
                                     <td>{{ fill.simpleLeavesQty }}</td>
                                     <td>{{ fill.lastPx }}</td>
-{#                                    <td>#}
-{#                                        {% ifequal fill.ordType "Market" %}#}
-{#                                            "Market"#}
-{#                                        {% else %}#}
-{#                                            {{ fill.price }}#}
-{#                                        {% endifequal %}#}
-{#                                    </td>#}
+                                    {#                                    <td>#}
+                                    {#                                        {% ifequal fill.ordType "Market" %}#}
+                                    {#                                            "Market"#}
+                                    {#                                        {% else %}#}
+                                    {#                                            {{ fill.price }}#}
+                                    {#                                        {% endifequal %}#}
+                                    {#                                    </td>#}
                                     <td>{{ fill.value }} XBT</td>
                                     <td>{{ fill.ordType }}</td>
                                     <td style="color: #{{ fill.idColor }};"><span
                                             data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
+                                    <td>{{ fill.timestamp }}</td>
                                 </tr>
                             {% endif %}
                         {% endfor %}

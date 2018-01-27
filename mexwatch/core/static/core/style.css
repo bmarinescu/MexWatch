@@ -18,16 +18,16 @@ body {
 }
 
 .main.toggled {
-  padding-left: 250px;
+  padding-left: 320px;
 }
 
 #sidebar-wrapper {
   z-index: 1000;
   position: fixed;
-  left: 250px;
+  left: 320px;
   width: 0;
   height: 100%;
-  margin-left: -250px;
+  margin-left: -320px;
   overflow-y: auto;
   background: #000;
   -webkit-transition: all 0.5s ease;
@@ -37,7 +37,7 @@ body {
 }
 
 .main.toggled #sidebar-wrapper {
-  width: 250px;
+  width: 320px;
 }
 
 #page-content-wrapper {
@@ -48,7 +48,7 @@ body {
 
 .main.toggled #page-content-wrapper {
   position: absolute;
-  margin-right: -250px;
+  margin-right: -320px;
 }
 
 
@@ -104,19 +104,23 @@ body {
 			display: block;
 		}
 
-		tr[data-order-type="Sell"] td:first-child {
-			border-left: 4px solid #ff0000 !important;
+		tr[data-order-type="Sell"] td:first-child,
+		tr[data-order-type="Short"] td:first-child {
+			border-left: 4px solid #ff0000;
 		}
 
-		tr[data-order-type="Buy"] td:first-child {
-			border-left: 4px solid #00ff00 !important;
+		tr[data-order-type="Buy"] td:first-child,
+		tr[data-order-type="Long"] td:first-child {
+			border-left: 4px solid #00ff00;
 		}
 
-		tr[data-order-type="Sell"] td:nth-child(2) {
+		tr[data-order-type="Sell"] td:nth-child(2),
+		tr[data-order-type="Short"] td:nth-child(2) {
 			color: #ff0000;
 		}
 
-		tr[data-order-type="Buy"] td:nth-child(2) {
+		tr[data-order-type="Buy"] td:nth-child(2),
+		tr[data-order-type="Long"] td:nth-child(2) {
 			color: #00ff00;
 		}
 
@@ -167,3 +171,6 @@ body {
 			top: 5px;
 			display: inline-block;
         }
+
+        .table-users th { white-space: nowrap; }
+		.table-users tbody td:first-child a { display: block; text-decoration: none; }

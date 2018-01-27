@@ -46,6 +46,10 @@ def call_bitmex_api(url, get_params={}, api_key='4YFgfRe713-feq7ovWHtl_da',
                             headers={'api-expires': str(expires),
                                      'api-key': api_key,
                                      'api-signature': signature})
+
+    print("API CALL: " + url + " key:" + api_key[0:4] + " remaining: " + response.headers[
+        "x-ratelimit-remaining"] + " / time-remaining: "
+          + response.headers["x-ratelimit-reset"])
     return json.loads(response.text)
 
 
@@ -74,7 +78,8 @@ def textToColor(text):
 
 def frontpage(request):
     if User.objects.count() == 0:
-        User.objects.create(name="benis",key_pub="4YFgfRe713-feq7ovWHtl_da", key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m")
+        User.objects.create(name="benis", key_pub="4YFgfRe713-feq7ovWHtl_da",
+                            key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m")
     return redirect("user", User.objects.first().name)
 
 
@@ -136,10 +141,40 @@ def userpage(request, username):
         user.delete()
         raise Http404()
 
-    fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"}, api_key=user.key_pub, api_secret=user.key_secret)
-    order_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New"}'}, api_key=user.key_pub, api_secret=user.key_secret)
-    stop_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New", "ordType":"Stop"}'}, api_key=user.key_pub, api_secret=user.key_secret)
-    instruments = call_bitmex_api('/instrument/indices', {"filter": '{"symbol":"."}'}, api_key=user.key_pub, api_secret=user.key_secret)
+    fills_json = call_bitmex_api('/execution/tradeHistory', {"reverse": "true"}, api_key=user.key_pub,
+                                 api_secret=user.key_secret)
+    order_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New", "ordType":"Limit"}'},
+                                 api_key=user.key_pub, api_secret=user.key_secret)
+    stop_json = call_bitmex_api('/order', {"reverse": "true", "filter": '{"ordStatus":"New", "ordType":"Stop"}'},
+                                api_key=user.key_pub, api_secret=user.key_secret)
+    instruments = call_bitmex_api('/instrument/indices', {"filter": '{"symbol":"."}'}, api_key=user.key_pub,
+                                  api_secret=user.key_secret)
+    wallet = call_bitmex_api('/user/wallet', api_key=user.key_pub, api_secret=user.key_secret)
+
+    wallet["amount"] = satoshis_to_btc(wallet["amount"])
+
+    allUsers = User.objects.all()
+
+    for u in allUsers:
+        w = call_bitmex_api('/user/wallet', api_key=u.key_pub, api_secret=u.key_secret)
+        w["amount"] = satoshis_to_btc(w["amount"])
+        u.wallet = w
+
+        pos = call_bitmex_api('/position', api_key=u.key_pub, api_secret=u.key_secret)
+        total_pos_value = 0
+        for p in pos:
+            if p["symbol"] == "XBTUSD":
+                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
+            else:
+                p["value"] = p["currentQty"] * p["markPrice"]
+            p["value"] = round(p["value"], 4)
+            total_pos_value += p["value"]
+        if w["amount"] != 0:
+            u.total_positions_value = str(round(total_pos_value / w["amount"], 2)) + "X ~ " + str(
+                round(total_pos_value, 4))
+        else:
+            u.total_positions_value = 0
+            w["amount"] = 0
 
     for p in positions_json:
         if p["isOpen"]:
@@ -152,13 +187,18 @@ def userpage(request, username):
             else:
                 p["value"] = p["currentQty"] * p["markPrice"]
             p["value"] = round(p["value"], 4)
-
+        p["timestamp"] = get_display_time(p["timestamp"])
+        if p["currentQty"] < 0:
+            p["side"] = "Short"
+        else:
+            p["side"] = "Long"
 
     for s in stop_json:
         if not s["price"]:
             s["price"] = "Market"
         if not s["triggered"]:
             s["status"] = "Untriggered"
+        s["timestamp"] = get_display_time(s["timestamp"])
 
     for f in fills_json:
         f["shortId"] = f["orderID"][0:7]
@@ -167,15 +207,35 @@ def userpage(request, username):
             f["value"] = str(f["orderQty"] / f["price"])[0:6]
         else:
             f["value"] = str(f["lastPx"] * f["orderQty"])[0:6]
+        f["timestamp"] = get_display_time(f["timestamp"])
+
+    for o in order_json:
+        if o["symbol"][0:6] == "XBTUSD":
+            o["value"] = str(o["orderQty"] / o["price"])[0:6]
+        else:
+            o["value"] = str(o["price"] * o["orderQty"])[0:6]
+        o["timestamp"] = get_display_time(o["timestamp"])
 
     return render(request, "core/index.html", {'fills': fills_json,
                                                'fillsDump': json.dumps(fills_json, indent=2),
                                                'positions': positions_json,
                                                'positionsDump': json.dumps(positions_json, indent=2),
-                                               'order': order_json,
+                                               'orders': order_json,
                                                'orderDump': json.dumps(order_json, indent=2),
                                                'stops': stop_json,
                                                'stopsDump': json.dumps(stop_json, indent=2),
-                                               'users': User.objects.all(),
+                                               'users': allUsers,
                                                'instruments': json.dumps(instruments, indent=2),
+                                               'wallet': wallet,
+                                               'walletDump': json.dumps(wallet, indent=2),
                                                })
+
+
+def satoshis_to_btc(satoshis):
+    if satoshis == 0:
+        return 0
+    return round(satoshis / SATOSHIS_PER_BTC, 4)
+
+
+def get_display_time(time_str):
+    return time_str[0:19].replace("T", " ")
