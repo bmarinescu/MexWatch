@@ -46,10 +46,9 @@ def call_bitmex_api(url, get_params={}, api_key='4YFgfRe713-feq7ovWHtl_da',
                             headers={'api-expires': str(expires),
                                      'api-key': api_key,
                                      'api-signature': signature})
-
-    print("API CALL: " + url + " key:" + api_key[0:4] + " remaining: " + response.headers[
-        "x-ratelimit-remaining"] + " / time-remaining: "
-          + response.headers["x-ratelimit-reset"])
+    # print("API CALL: " + url + " key:" + api_key[0:4] + " remaining: " + response.headers[
+    #     "x-ratelimit-remaining"] + " / time-remaining: "
+    #       + response.headers["x-ratelimit-reset"])
     return json.loads(response.text)
 
 
@@ -95,6 +94,8 @@ def create_user(request):
     except KeyError as e:
         return get_http_response_for_key_error(e)
 
+    hide_balances = request.POST.get("hide_balance", "false")
+
     if User.objects.filter(name=name).count() != 0:
         return get_err_response(409, "Name already taken.")
 
@@ -108,7 +109,7 @@ def create_user(request):
 
     existing_user_query = User.objects.filter(key_pub=key_pub, key_secret=key_secret)
     if existing_user_query.count() == 0:
-        User.objects.create(name=name, key_pub=key_pub, key_secret=key_secret)
+        User.objects.create(name=name, key_pub=key_pub, key_secret=key_secret, hide_balance=(hide_balances == "on"))
 
         return HttpResponse(
             '{"message" : "User created!"}',
@@ -157,9 +158,21 @@ def userpage(request, username):
 
     allUsers = User.objects.all()
 
+    multiplier = 1
+    if user.hide_balance and wallet["amount"] != 0:
+        multiplier = 1 / wallet["amount"]
+
+    wallet["amount"] *= multiplier
+
     for u in allUsers:
         w = call_bitmex_api('/user/wallet', api_key=u.key_pub, api_secret=u.key_secret)
         w["amount"] = satoshis_to_btc(w["amount"])
+
+        u.multiplier = 1
+        if u.hide_balance and w["amount"] != 0:
+            u.multiplier = 1 / w["amount"]
+
+        w["amount"] *= u.multiplier
         u.wallet = w
 
         pos = call_bitmex_api('/position', api_key=u.key_pub, api_secret=u.key_secret)
@@ -172,8 +185,11 @@ def userpage(request, username):
             p["value"] = round(p["value"], 4)
             total_pos_value += p["value"]
         if w["amount"] != 0:
-            u.total_positions_value = str(round(total_pos_value / w["amount"], 2)) + "X ~ " + str(
-                round(total_pos_value, 4))
+            if u.hide_balance:
+                u.total_positions_value = str(round(multiplier * total_pos_value, 4))
+            else:
+                u.total_positions_value = str(round(total_pos_value / w["amount"], 2)) + "X ~ " + str(
+                    round(multiplier * total_pos_value, 4))
         else:
             u.total_positions_value = 0
             w["amount"] = 0
@@ -182,18 +198,23 @@ def userpage(request, username):
         if p["isOpen"]:
             p['maintMargin'] = str(round(float(p["maintMargin"]) / SATOSHIS_PER_BTC, 2)) + \
                                (" (Cross)", "")[p["crossMargin"] == "1"]
-            p["unrealisedGrossPnl"] = round(p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
-            p["realizedPnl"] = round((float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
+            p["unrealisedGrossPnl"] = round(multiplier * p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
+            p["realizedPnl"] = round(
+                multiplier * (float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
             if p["symbol"] == "XBTUSD":
                 p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
             else:
                 p["value"] = p["currentQty"] * p["markPrice"]
-            p["value"] = round(p["value"], 4)
+            p["value"] = round(multiplier * p["value"], 4)
         p["timestamp"] = get_display_time(p["timestamp"])
         if p["currentQty"] < 0:
             p["side"] = "Short"
         else:
             p["side"] = "Long"
+
+        p["currentQty"] = multiplier * p["currentQty"]
+
+        p["currentQty"] = specialRound(p["currentQty"])
 
     for s in stop_json:
         if not s["price"]:
@@ -201,6 +222,10 @@ def userpage(request, username):
         if not s["triggered"]:
             s["status"] = "Untriggered"
         s["timestamp"] = get_display_time(s["timestamp"])
+        if not s["avgPx"]:
+            s["avgPx"] = "-"
+
+        s["cumQty"] = specialRound(s["cumQty"] * multiplier)
 
     for h in order_history:
         if not h["price"]:
@@ -228,26 +253,42 @@ def userpage(request, username):
 
     for o in order_json:
         if o["symbol"][0:6] == "XBTUSD":
-            o["value"] = str(o["orderQty"] / o["price"])[0:6]
+            o["value"] = str( multiplier * o["orderQty"] / o["price"])[0:6]
         else:
-            o["value"] = str(o["price"] * o["orderQty"])[0:6]
+            o["value"] = str( multiplier * o["price"] * o["orderQty"])[0:6]
         o["timestamp"] = get_display_time(o["timestamp"])
 
-    return render(request, "core/index.html", {'fills': fills_json,
-                                               'fillsDump': json.dumps(fills_json, indent=2),
-                                               'positions': positions_json,
-                                               'positionsDump': json.dumps(positions_json, indent=2),
-                                               'orders': order_json,
-                                               'orderDump': json.dumps(order_json, indent=2),
-                                               'stops': stop_json,
-                                               'stopsDump': json.dumps(stop_json, indent=2),
-                                               'users': allUsers,
-                                               'instruments': json.dumps(instruments, indent=2),
-                                               'wallet': wallet,
-                                               'walletDump': json.dumps(wallet, indent=2),
-                                               'history': order_history,
-                                               'historyDump': json.dumps(order_history, indent=2),
-                                               })
+        o["cumQty"] = specialRound(o["cumQty"] * multiplier)
+        o["orderQty"] = specialRound(o["orderQty"] * multiplier)
+        o["leavesQty"] = specialRound(o["leavesQty"] * multiplier)
+
+    return render(request, "core/index.html", {
+        'currentUser': user,
+        'fills': fills_json,
+        'fillsDump': json.dumps(fills_json, indent=2),
+        'positions': positions_json,
+        'positionsDump': json.dumps(positions_json, indent=2),
+        'orders': order_json,
+        'orderDump': json.dumps(order_json, indent=2),
+        'stops': stop_json,
+        'stopsDump': json.dumps(stop_json, indent=2),
+        'users': allUsers,
+        'instruments': json.dumps(instruments, indent=2),
+        'wallet': wallet,
+        'walletDump': json.dumps(wallet, indent=2),
+        'history': order_history,
+        'historyDump': json.dumps(order_history, indent=2),
+    })
+
+
+def specialRound(p):
+    if p == 0:
+        return 0
+    if abs(p) >= 100:
+        p = int(p)
+    else:
+        p = round(p, 4)
+    return p
 
 
 def satoshis_to_btc(satoshis):

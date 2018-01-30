@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'core/darkly.css' %}">
     <link rel="stylesheet" href="{% static 'core/mini.css' %}">
     <link rel="stylesheet" href="{% static 'core/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"/>
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <!-- Bootstrap JavaScript -->
@@ -44,10 +45,15 @@
             </thead>
             <tbody>
             {% for u in users %}
-                <tr class="active-user">
+                <tr class="active-user {% ifequal currentUser.id u.id %}active{% endifequal %}">
                     <td><a href="{% url "user" u.name %}">{{ u.name }}</a></td>
-                    <td>{{ u.wallet.amount }}</td>
+                    <td>{{ u.wallet.amount }}
+                        {% if u.hide_balance %}
+                        <span class="text-success" style="cursor: pointer;" data-toggle="tooltip"
+                             data-placement="auto" title="The user has a hidden balance. All trades are scaled to a balance of 1 BTC"><i class="fa fa-question-circle"></i></span></td>
+                        {% endif %}
                     <td>{{ u.total_positions_value }}</td>
+
                 </tr>
             {% endfor %}
             </tbody>
@@ -69,9 +75,11 @@
     {#    </div>#}
     <div class="container">
         <ul id="tabs_main" class="nav nav-tabs">
-            <li class="active"><a href="#positions_tab" data-toggle="tab">Positions <strong>({{ positions|length }})</strong></a></li>
+            <li class="active"><a href="#positions_tab" data-toggle="tab">Positions
+                <strong>({{ positions|length }})</strong></a></li>
             <li><a href="#closed_positions_tab" data-toggle="tab">Closed Positions <strong>(-)</strong></a></li>
-            <li><a href="#active_orders_tab" data-toggle="tab">Active Orders <strong>({{ orders|length }})</strong></a></li>
+            <li><a href="#active_orders_tab" data-toggle="tab">Active Orders <strong>({{ orders|length }})</strong></a>
+            </li>
             <li><a href="#stops" data-toggle="tab">Stops <strong>({{ stops|length }})</strong></a></li>
             <li><a href="#fills" data-toggle="tab">Fills</a></li>
             <li><a href="#order_history" data-toggle="tab">Order History</a></li>
@@ -110,7 +118,9 @@
                                     <td>{{ position.maintMargin }}</td>
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
-                                    <th><span style="display: block; white-space: nowrap;">{{ position.timestamp }}</span></th>
+                                    <th><span
+                                            style="display: block; white-space: nowrap;">{{ position.timestamp }}</span>
+                                    </th>
                                 </tr>
                             {% endifequal %}
                         {% endfor %}
@@ -157,7 +167,8 @@
                                 <td>{{ o.value }} XBT</td>
                                 <td>{{ o.ordType }}</td>
                                 <td>{{ o.ordStatus }}</td>
-                                <td><span class="timeago" datetime="{{ o.timestamp }}" title="{{ o.timestamp }}"></span></td>
+                                <td><span class="timeago" datetime="{{ o.timestamp }}" title="{{ o.timestamp }}"></span>
+                                </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -190,13 +201,14 @@
                                 <td>{{ s.symbol }}</td>
                                 <td>{{ s.orderQty }}</td>
                                 <td>{{ s.price }}</td>
-                                <td>{{ s.filled }}</td>
+                                <td>{{ s.cumQty }}</td>
                                 <td>{{ s.stopPx }}</td>
                                 <td>{{ s.triggeringPrice }}</td>
-                                <td>{{ s.fillPrice }}</td>
-                                <td>{{ s.type }}</td>
+                                <td>{{ s.avgPx }}</td>
+                                <td>{{ s.execInst }}</td>
                                 <td>{{ s.status }}</td>
-                                <td><span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span></td>
+                                <td><span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span>
+                                </td>
                             </tr>
                         {% endfor %}
 
@@ -246,7 +258,8 @@
                                     <td style="color: #{{ fill.idColor }};"><span
                                             data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
-                                    <td><span class="timeago" datetime="{{ fill.timestamp }}" title="{{ fill.timestamp }}"></span></td>
+                                    <td><span class="timeago" datetime="{{ fill.timestamp }}"
+                                              title="{{ fill.timestamp }}"></span></td>
                                 </tr>
                             {% endif %}
                         {% endfor %}
@@ -283,7 +296,8 @@
                             <td>{{ h.avgPx }}</td>
                             <td>{{ h.ordType }}</td>
                             <td>{{ h.status }}</td>
-                            <td><span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span></td>
+                            <td><span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span>
+                            </td>
                         </tr>
                     {% endfor %}
 
@@ -322,15 +336,31 @@
                             <label for="key_secret">Secret key</label>
                             <input type="text" class="form-control" id="key_secret" name="key_secret" placeholder="">
                         </div>
-                        <div class="form-group">
-                            <div class="printArea text-success">
+
+                        <div class="mag_top" style="display: inline-block; cursor: pointer;" data-toggle="tooltip"
+                             data-placement="top"
+                             title="When enabled, your balance will always show as 1 BTC and all your trades will be scaled appropriately">
+                            <div class="pretty p-default p-curve p-toggle" style="margin-right: 0.3em;">
+                                <input type="checkbox" name="hide_balance" checked="checked" id="hide_balance_chk"/>
+                                <div class="state p-danger p-off">
+                                    <label>Show real balance</label>
+                                </div>
+                                <div class="state p-success p-on">
+                                    <label>Hide real balance </label>
+                                </div>
+                            </div>
+                            <i class="fa fa-question-circle-o text-warning"></i>
+
+                            <div class="form-group pad_top">
+                                <div class="printArea text-success">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close</button>
-                        <button type="submit" class="btn btn-default">Submit</button>
-                    </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close
+                            </button>
+                            <button type="submit" class="btn btn-default">Submit</button>
+                        </div>
                 </form>
             </div>
         </div>
@@ -358,9 +388,11 @@
         // use render method to render nodes in real time
         timeagoInstance.render(nodes);
         // cancel real-time render for every node
-        timeago.cancel()
+        timeago.cancel();
         // or for the specific one
-        timeago.cancel(nodes[0])
+        timeago.cancel(nodes[0]);
+
+        $('[data-toggle="tooltip"]').tooltip()
     });
 
 
