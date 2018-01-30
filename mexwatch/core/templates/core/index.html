@@ -25,6 +25,7 @@
 			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
 			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 		<![endif]-->
+    <script src="{% static 'core/timeago.js' %}"></script>
 </head>
 <body>
 
@@ -34,22 +35,22 @@
             keypair</a>
         <hr>
         <table class="table table-users">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Balance</th>
-                        <th>Positions Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for u in users %}
-                        <tr class="active-user">
-                            <td><a href="{% url "user" u.name %}">{{ u.name }}</a></td>
-                            <td>{{ u.wallet.amount }}</td>
-                            <td>{{ u.total_positions_value }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
+            <thead>
+            <tr>
+                <th>User</th>
+                <th>Balance</th>
+                <th>Positions Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for u in users %}
+                <tr class="active-user">
+                    <td><a href="{% url "user" u.name %}">{{ u.name }}</a></td>
+                    <td>{{ u.wallet.amount }}</td>
+                    <td>{{ u.total_positions_value }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
         </table>
 
     </div>
@@ -61,17 +62,17 @@
     <div class="corner_balance">
         <span title="Total balance">{{ wallet.amount }} BTC</span>
     </div>
-{#    <div class="container">#}
-{#        <pre>#}
-{#            {{ walletDump }}#}
-{#        </pre>#}
-{#    </div>#}
+    {#    <div class="container">#}
+    {#        <pre>#}
+    {#            {{ walletDump }}#}
+    {#        </pre>#}
+    {#    </div>#}
     <div class="container">
         <ul id="tabs_main" class="nav nav-tabs">
-            <li class="active"><a href="#positions_tab" data-toggle="tab">Positions</a></li>
-            <li><a href="#closed_positions_tab" data-toggle="tab">Closed Positions</a></li>
-            <li><a href="#active_orders_tab" data-toggle="tab">Active Orders</a></li>
-            <li><a href="#stops" data-toggle="tab">Stops</a></li>
+            <li class="active"><a href="#positions_tab" data-toggle="tab">Positions <strong>({{ positions|length }})</strong></a></li>
+            <li><a href="#closed_positions_tab" data-toggle="tab">Closed Positions <strong>(-)</strong></a></li>
+            <li><a href="#active_orders_tab" data-toggle="tab">Active Orders <strong>({{ orders|length }})</strong></a></li>
+            <li><a href="#stops" data-toggle="tab">Stops <strong>({{ stops|length }})</strong></a></li>
             <li><a href="#fills" data-toggle="tab">Fills</a></li>
             <li><a href="#order_history" data-toggle="tab">Order History</a></li>
             <li><a href="#info_tab" data-toggle="tab">Info</a></li>
@@ -109,7 +110,7 @@
                                     <td>{{ position.maintMargin }}</td>
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
-                                    <th>{{ position.timestamp }}</th>
+                                    <th><span style="display: block; white-space: nowrap;">{{ position.timestamp }}</span></th>
                                 </tr>
                             {% endifequal %}
                         {% endfor %}
@@ -156,7 +157,7 @@
                                 <td>{{ o.value }} XBT</td>
                                 <td>{{ o.ordType }}</td>
                                 <td>{{ o.ordStatus }}</td>
-                                <td>{{ o.timestamp }}</td>
+                                <td><span class="timeago" datetime="{{ o.timestamp }}" title="{{ o.timestamp }}"></span></td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -195,7 +196,7 @@
                                 <td>{{ s.fillPrice }}</td>
                                 <td>{{ s.type }}</td>
                                 <td>{{ s.status }}</td>
-                                <td>{{ s.timestamp }}</td>
+                                <td><span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span></td>
                             </tr>
                         {% endfor %}
 
@@ -245,7 +246,7 @@
                                     <td style="color: #{{ fill.idColor }};"><span
                                             data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
-                                    <td>{{ fill.timestamp }}</td>
+                                    <td><span class="timeago" datetime="{{ fill.timestamp }}" title="{{ fill.timestamp }}"></span></td>
                                 </tr>
                             {% endif %}
                         {% endfor %}
@@ -257,8 +258,39 @@
                 </pre>
             </div>
             <div class="tab-pane fade" id="order_history">
-                <div class="order_history_inner">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Filled</th>
+                        <th>Stop Price</th>
+                        <th>Fill Price</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for h in history %}
+                        <tr data-order-type="{{ h.side }}">
+                            <td>{{ h.symbol }}</td>
+                            <td>{{ h.orderQty }}</td>
+                            <td>{{ h.price }}</td>
+                            <td>{{ h.cumQty }}</td>
+                            <td>{{ h.stopPx }}</td>
+                            <td>{{ h.avgPx }}</td>
+                            <td>{{ h.ordType }}</td>
+                            <td>{{ h.status }}</td>
+                            <td><span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span></td>
+                        </tr>
+                    {% endfor %}
 
+                    </tbody>
+                </table>
+                <div class="order_history_inner">
+                    <pre>{{ historyDump }}</pre>
                 </div>
             </div>
             <div class="tab-pane fade in active" id="info_tab">
@@ -320,6 +352,15 @@
         // ########################################################
         // $('#add_key_modal').modal('show');
         // ########################################################
+
+        var timeagoInstance = timeago();
+        var nodes = document.querySelectorAll('.timeago');
+        // use render method to render nodes in real time
+        timeagoInstance.render(nodes);
+        // cancel real-time render for every node
+        timeago.cancel()
+        // or for the specific one
+        timeago.cancel(nodes[0])
     });
 
 

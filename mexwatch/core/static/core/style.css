@@ -174,3 +174,7 @@ body {
 
         .table-users th { white-space: nowrap; }
 		.table-users tbody td:first-child a { display: block; text-decoration: none; }
+
+		@media screen and (max-width: 991px) {
+			.tab_inner { overflow-x: scroll; }
+		}

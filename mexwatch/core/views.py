@@ -151,6 +151,8 @@ def userpage(request, username):
                                   api_secret=user.key_secret)
     wallet = call_bitmex_api('/user/wallet', api_key=user.key_pub, api_secret=user.key_secret)
 
+    order_history = call_bitmex_api('/order', {"reverse": "true"}, api_key=user.key_pub, api_secret=user.key_secret)
+
     wallet["amount"] = satoshis_to_btc(wallet["amount"])
 
     allUsers = User.objects.all()
@@ -200,6 +202,21 @@ def userpage(request, username):
             s["status"] = "Untriggered"
         s["timestamp"] = get_display_time(s["timestamp"])
 
+    for h in order_history:
+        if not h["price"]:
+            h["price"] = "Market"
+        h["timestamp"] = get_display_time(h["timestamp"])
+        if h["ordType"] == "Stop":
+            if not h["triggered"]:
+                h["status"] = "Untriggered"
+            else:
+                h["status"] = "Triggered"
+        else:
+            h["status"] = "-"
+            h["stopPx"] = "-"
+        if h["side"] == "Sell":
+            h["orderQty"] = "-" + str(h["orderQty"])
+
     for f in fills_json:
         f["shortId"] = f["orderID"][0:7]
         f["idColor"] = textToColor(f["orderID"])
@@ -228,6 +245,8 @@ def userpage(request, username):
                                                'instruments': json.dumps(instruments, indent=2),
                                                'wallet': wallet,
                                                'walletDump': json.dumps(wallet, indent=2),
+                                               'history': order_history,
+                                               'historyDump': json.dumps(order_history, indent=2),
                                                })
 
 
@@ -238,4 +257,4 @@ def satoshis_to_btc(satoshis):
 
 
 def get_display_time(time_str):
-    return time_str[0:19].replace("T", " ")
+    return time_str[0:19].replace("T", " ") + " UTC"
