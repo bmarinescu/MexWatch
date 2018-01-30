@@ -3,9 +3,7 @@ import hmac
 import json
 import logging
 import time
-import types
 import urllib.parse
-from pprint import pprint
 
 import zlib
 from django.contrib.sites import requests
@@ -15,8 +13,7 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 
 from core.models import User
-
-SATOSHIS_PER_BTC = 100000000
+from core.utils import SATOSHIS_PER_BTC, satoshis_to_btc, get_display_time, specialRound
 
 
 def str_to_bytes(str):
@@ -281,21 +278,3 @@ def userpage(request, username):
     })
 
 
-def specialRound(p):
-    if p == 0:
-        return 0
-    if abs(p) >= 100:
-        p = int(p)
-    else:
-        p = round(p, 4)
-    return p
-
-
-def satoshis_to_btc(satoshis):
-    if satoshis == 0:
-        return 0
-    return round(satoshis / SATOSHIS_PER_BTC, 4)
-
-
-def get_display_time(time_str):
-    return time_str[0:19].replace("T", " ") + " UTC"
