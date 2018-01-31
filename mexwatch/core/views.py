@@ -13,7 +13,7 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 
 from core.models import User
-from core.utils import SATOSHIS_PER_BTC, satoshis_to_btc, get_display_time, specialRound
+from core.utils import SATOSHIS_PER_BTC, satoshis_to_btc, get_display_time, get_display_number
 
 
 def str_to_bytes(str):
@@ -117,6 +117,7 @@ def create_user(request):
         assert existing_user_query.count() == 1
         existing_user: User = existing_user_query.first()
         existing_user.name = name
+        existing_user.hide_balance = (hide_balances == "on")
         existing_user.save()
 
         return HttpResponse(
@@ -179,14 +180,14 @@ def userpage(request, username):
                 p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
             else:
                 p["value"] = p["currentQty"] * p["markPrice"]
-            p["value"] = round(p["value"], 4)
+            p["value"] = get_display_number(p["value"])
             total_pos_value += p["value"]
         if w["amount"] != 0:
             if u.hide_balance:
-                u.total_positions_value = str(round(multiplier * total_pos_value, 4))
+                u.total_positions_value = get_display_number(multiplier * total_pos_value)
             else:
-                u.total_positions_value = str(round(total_pos_value / w["amount"], 2)) + "X ~ " + str(
-                    round(multiplier * total_pos_value, 4))
+                u.total_positions_value = str(round(total_pos_value / w["amount"], 2)) + \
+                                          "X ~ " + str(get_display_number(multiplier * total_pos_value))
         else:
             u.total_positions_value = 0
             w["amount"] = 0
@@ -211,7 +212,7 @@ def userpage(request, username):
 
         p["currentQty"] = multiplier * p["currentQty"]
 
-        p["currentQty"] = specialRound(p["currentQty"])
+        p["currentQty"] = get_display_number(p["currentQty"])
 
     for s in stop_json:
         if not s["price"]:
@@ -222,7 +223,7 @@ def userpage(request, username):
         if not s["avgPx"]:
             s["avgPx"] = "-"
 
-        s["cumQty"] = specialRound(s["cumQty"] * multiplier)
+        s["cumQty"] = get_display_number(s["cumQty"] * multiplier)
 
     for h in order_history:
         if not h["price"]:
@@ -250,14 +251,14 @@ def userpage(request, username):
 
     for o in order_json:
         if o["symbol"][0:6] == "XBTUSD":
-            o["value"] = str( multiplier * o["orderQty"] / o["price"])[0:6]
+            o["value"] = str(multiplier * o["orderQty"] / o["price"])[0:6]
         else:
-            o["value"] = str( multiplier * o["price"] * o["orderQty"])[0:6]
+            o["value"] = str(multiplier * o["price"] * o["orderQty"])[0:6]
         o["timestamp"] = get_display_time(o["timestamp"])
 
-        o["cumQty"] = specialRound(o["cumQty"] * multiplier)
-        o["orderQty"] = specialRound(o["orderQty"] * multiplier)
-        o["leavesQty"] = specialRound(o["leavesQty"] * multiplier)
+        o["cumQty"] = get_display_number(o["cumQty"] * multiplier)
+        o["orderQty"] = get_display_number(o["orderQty"] * multiplier)
+        o["leavesQty"] = get_display_number(o["leavesQty"] * multiplier)
 
     return render(request, "core/index.html", {
         'currentUser': user,
@@ -276,5 +277,3 @@ def userpage(request, username):
         'history': order_history,
         'historyDump': json.dumps(order_history, indent=2),
     })
-
-
