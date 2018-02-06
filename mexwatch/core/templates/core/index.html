@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="{% static 'core/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"/>
     <!-- jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <!-- Bootstrap JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -128,16 +128,16 @@
                         </tbody>
                     </table>
                 </div>
-                <pre>
-                    {{ positionsDump }}
-                </pre>
+{#                <pre>#}
+{#                    {{ positionsDump }}#}
+{#                </pre>#}
             </div>
             <div class="tab-pane fade" id="closed_positions_tab">
                 <div class="closed_positions_tab_inner tab_inner">
 
                 </div>
                 <pre>
-                    {{ orderDump }}
+{#                    {{ orderDump }}#}
                 </pre>
             </div>
             <div class="tab-pane fade" id="active_orders_tab">
@@ -174,9 +174,9 @@
                         </tbody>
                     </table>
                 </div>
-                <pre>
-                    {{ orderDump }}
-                </pre>
+{#                <pre>#}
+{#                    {{ orderDump }}#}
+{#                </pre>#}
             </div>
             <div class="tab-pane fade" id="stops">
                 <div class="stops_tab_inner tab_inner">
@@ -215,12 +215,13 @@
                         </tbody>
                     </table>
                 </div>
-                <pre>
-                    {{ stopsDump }}
-                </pre>
+{#                <pre>#}
+{#                    {{ stopsDump }}#}
+{#                </pre>#}
             </div>
             <div class="tab-pane fade" id="fills">
                 <div class="fills_inner tab_inner">
+                    <svg class="chart" id="fills-chart" width="960" height="500"></svg>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -266,9 +267,9 @@
                         </tbody>
                     </table>
                 </div>
-                <pre>
-                    {{ fillsDump }}
-                </pre>
+{#                <pre>#}
+{#                    {{ fillsDump }}#}
+{#                </pre>#}
             </div>
             <div class="tab-pane fade" id="order_history">
                 <table class="table table-striped">
@@ -309,7 +310,7 @@
             </div>
             <div class="tab-pane fade in active" id="info_tab">
                 <div class="info_tab_inner tab_inner">
-                    <pre>{{ instruments }}</pre>
+{#                    <pre>{{ instruments }}</pre>#}
                 </div>
             </div>
         </div>
@@ -361,11 +362,22 @@
                             </button>
                             <button type="submit" class="btn btn-default">Submit</button>
                         </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+<script>
+    var wallet = JSON.parse("{{ walletDump | safe | escapejs}}"),
+    positions = JSON.parse("{{ positionsDump | safe | escapejs}}"),
+    orders = JSON.parse("{{ orderDump | safe | escapejs}}"),
+    stops = JSON.parse("{{ stopsDump | safe | escapejs}}"),
+    fills = JSON.parse("{{ fillsDump | safe | escapejs}}"),
+    instruments = JSON.parse("{{ instruments | safe | escapejs}}");
+</script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="{% static 'scripts/app.js' %}"></script>
 <script>
     $(function () {
         $("body").addClass("loaded");

@@ -273,7 +273,7 @@ def userpage(request, username):
         'users': allUsers,
         'instruments': json.dumps(instruments, indent=2),
         'wallet': wallet,
-        'walletDump': json.dumps(wallet, indent=2),
+        'walletDump': json.dumps(wallet),
         'history': order_history,
         'historyDump': json.dumps(order_history, indent=2),
     })
