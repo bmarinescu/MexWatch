@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'core/mini.css' %}">
     <link rel="stylesheet" href="{% static 'core/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css"/>
+    <link rel="stylesheet" href="{% static 'core/styles/app.css' %}">
     <!-- jQuery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <!-- Bootstrap JavaScript -->
@@ -370,6 +371,7 @@
 </div>
 <script>
     var wallet = JSON.parse("{{ walletDump | safe | escapejs}}"),
+    walletHistory = JSON.parse("{{ walletHistory | safe | escapejs}}"),
     positions = JSON.parse("{{ positionsDump | safe | escapejs}}"),
     orders = JSON.parse("{{ orderDump | safe | escapejs}}"),
     stops = JSON.parse("{{ stopsDump | safe | escapejs}}"),

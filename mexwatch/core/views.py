@@ -152,6 +152,8 @@ def userpage(request, username):
 
     order_history = call_bitmex_api('/order', {"reverse": "true"}, api_key=user.key_pub, api_secret=user.key_secret)
 
+    wallet_history = call_bitmex_api('/user/walletHistory', api_key=user.key_pub, api_secret=user.key_secret)
+
     wallet["amount"] = satoshis_to_btc(wallet["amount"])
 
     allUsers = User.objects.all()
@@ -277,4 +279,5 @@ def userpage(request, username):
         'walletDump': json.dumps(wallet),
         'history': order_history,
         'historyDump': json.dumps(order_history, indent=2),
+        'walletHistory': json.dumps(wallet_history, indent=2),
     })
