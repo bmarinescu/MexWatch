@@ -1,3 +1,13 @@
+import hashlib
+import hmac
+import json
+import time
+import urllib.parse
+import zlib
+
+import requests
+from django.http import HttpResponse
+
 SATOSHIS_PER_BTC = 100000000
 
 
@@ -40,3 +50,58 @@ def get_display_number(x):
         return neg + ms[0] + "." + ms[1:4] + "b"
     else:
         return e
+
+
+# noinspection PyDefaultArgument
+def call_bitmex_api(url, get_params={}, api_key='4YFgfRe713-feq7ovWHtl_da',
+                    api_secret='SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m'):
+    api_url = 'https://www.bitmex.com'
+
+    secret_bytes = str_to_bytes(api_secret)
+
+    verb = 'GET'
+    path = '/api/v1' + url
+    expires = round(time.time() + 60)
+
+    data_url = ""
+    if len(get_params) > 0:
+        data_url = "?" + urllib.parse.urlencode(get_params)
+
+    signature = hmac.new(secret_bytes, str.encode(verb + path + data_url + str(expires)), hashlib.sha256).hexdigest()
+
+    response = requests.get(api_url + path, get_params,
+                            headers={'api-expires': str(expires),
+                                     'api-key': api_key,
+                                     'api-signature': signature})
+    # print("API CALL: " + url + " key:" + api_key[0:4] + " remaining: " + response.headers[
+    #     "x-ratelimit-remaining"] + " / time-remaining: "
+    #       + response.headers["x-ratelimit-reset"])
+    return json.loads(response.text)
+
+
+def str_to_bytes(str):
+    b = bytearray()
+    b.extend(map(ord, str))
+    return b
+
+
+def get_http_response_for_key_error(e: KeyError, message=""):
+    return HttpResponse(e.__str__, status=400)
+
+
+def get_error_http_response(status: int, message: str):
+    return HttpResponse(
+        json.dumps({"err": message}),
+        content_type="application/json",
+        status=status
+    )
+
+
+def get_error_http_response_object_not_found(objType: str, id="?"):
+    return get_error_http_response(412, "Could not find " + objType + ": '" + str(id) + "'")
+
+
+def textToColor(text):
+    code = hex(zlib.crc32(str_to_bytes(text)))
+    code = code[2:8]
+    return code
