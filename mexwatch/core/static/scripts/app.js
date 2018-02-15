@@ -1,6 +1,33 @@
 (function($){
+    var user = window.location.pathname.replace('/u/', '');
+
+    //get charts
+    function getCharts() {
+        $.ajax({
+            method: 'GET',
+            url: '/get_charts',
+            success: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+    function getChartData(user, chart) {
+        $.ajax({
+            method: 'GET',
+            url: '/get_charts_data',
+            params: {
+                user: user,
+                chart_name: chart
+            },
+            success: function(response) {
+                console.log(response);
+            }
+        });
+    }
+
+
     //add charts
-    //delete charts
     $('body').on('click', 'button.add-chart', function(){
         var chart = $('div.base-chart').clone();
 
@@ -22,7 +49,6 @@
         return false;
     });
 })(jQuery);
-
 
 
 
