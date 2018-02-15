@@ -1,3 +1,14 @@
+/* bootstrap */
+.tooltip {
+    white-space: nowrap;
+}
+
+/* charts */
+.chart {
+    border: 1px solid #000;
+    background: rgba(0, 0, 0, 0.4);
+}
+
 .line {
     fill: none;
     stroke: #ffab00;
@@ -18,7 +29,7 @@ text {
     stroke: #fff;
 }
 
-.tooltip {
+.d3-tooltip {
     position: absolute;
     max-width: 150px;
     padding: 5px;
