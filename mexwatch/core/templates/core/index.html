@@ -69,7 +69,7 @@
         </table>
     </div>
     <div class="toggle-sidebar-contain">
-		<span class="btn btn-danger btn-sm" id="menu-toggle">
+		<span class="btn btn-danger btn-sm" id="menu-toggle" data-toggle="tooltip" data-placement="right" title="Toggle sidebar">
 			<i class="fa fa-bars"></i>
 		</span>
     </div>
@@ -448,11 +448,11 @@
                                 <svg class="chart" width="100%" height="500"></svg>
                             </div>
                             <div class="col-sm-1">
-                                <button class="btn-link add-chart" data-toggle="tooltip" title="Add chart">
+                                <button type="button" class="btn-link add-chart" data-toggle="tooltip" title="Add chart">
                                     <span class="sr-only">Add chart</span>
                                     <i class="fa fa-plus-circle"></i>
                                 </button>
-                                <button class="btn-link delete-chart" data-toggle="tooltip" title="Delete chart">
+                                <button type="button" class="btn-link delete-chart" data-toggle="tooltip" title="Delete chart">
                                     <span class="sr-only">Delete chart</span>
                                     <i class="fa fa-minus-circle"></i>
                                 </button>
@@ -495,15 +495,15 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="key_name">Name</label>
-                            <input type="text" class="form-control" id="key_name" name="key_name" placeholder="">
+                            <input type="text" class="form-control" id="key_name" name="key_name" required>
                         </div>
                         <div class="form-group">
                             <label for="key_pub">Public key</label>
-                            <input type="text" class="form-control" id="key_pub" name="key_pub" placeholder="">
+                            <input type="text" class="form-control" id="key_pub" name="key_pub" required>
                         </div>
                         <div class="form-group">
                             <label for="key_secret">Secret key</label>
-                            <input type="text" class="form-control" id="key_secret" name="key_secret" placeholder="">
+                            <input type="text" class="form-control" id="key_secret" name="key_secret" required>
                         </div>
 
                         <div class="mag_top" style="display: inline-block; cursor: pointer;" data-toggle="tooltip"
