@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from core.models import User
 from core.utils import SATOSHIS_PER_BTC, satoshis_to_btc, get_display_time, get_display_number, call_bitmex_api, \
     get_http_response_for_key_error, get_error_http_response, textToColor
+from mexwatch.settings import JSON_INDENT
 
 logger = logging.getLogger(__name__)
 
@@ -205,18 +206,18 @@ def userpage(request, username):
     return render(request, "core/index.html", {
         'currentUser': user,
         'fills': fills_json,
-        'fillsDump': json.dumps(fills_json, indent=2),
+        'fillsDump': json.dumps(fills_json, indent=JSON_INDENT),
         'positions': positions_json,
-        'positionsDump': json.dumps(positions_json, indent=2),
+        'positionsDump': json.dumps(positions_json, indent=JSON_INDENT),
         'orders': order_json,
-        'orderDump': json.dumps(order_json, indent=2),
+        'orderDump': json.dumps(order_json, indent=JSON_INDENT),
         'stops': stop_json,
-        'stopsDump': json.dumps(stop_json, indent=2),
+        'stopsDump': json.dumps(stop_json, indent=JSON_INDENT),
         'users': allUsers,
-        'instruments': json.dumps(instruments, indent=2),
+        'instruments': json.dumps(instruments, indent=JSON_INDENT),
         'wallet': wallet,
         'walletDump': json.dumps(wallet),
         'history': order_history,
-        'historyDump': json.dumps(order_history, indent=2),
-        'walletHistory': json.dumps(wallet_history, indent=2),
+        'historyDump': json.dumps(order_history, indent=JSON_INDENT),
+        'walletHistory': json.dumps(wallet_history, indent=JSON_INDENT),
     })
