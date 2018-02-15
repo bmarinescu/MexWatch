@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-            {% for u in users %}
+                {% for u in users %}
                 <tr class="active-user {% ifequal currentUser.id u.id %}active{% endifequal %}">
                     <td>
                         <a href="{% url "user" u.name %}">{{ u.name }}</a>
@@ -60,10 +60,13 @@
                     </td>
                     <td>{{ u.total_positions_value }}</td>
                 </tr>
-            {% endfor %}
+                {% empty %}
+                <tr>
+                    <td colspan="3">No entries</td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
-
     </div>
     <div class="toggle-sidebar-contain">
 		<span class="btn btn-danger btn-sm" id="menu-toggle">
@@ -115,6 +118,9 @@
                 <a href="#info_tab" data-toggle="tab">Info</a>
             </li>
             <li>
+                <a href="#charts_tab" data-toggle="tab">Charts</a>
+            </li>
+            <li>
                 <span class="refresh_btn">
                     <i class="fa fa-refresh text-success"></i>
                 </span>
@@ -154,11 +160,15 @@
                                     <td>{{ position.maintMargin }}</td>
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
-                                    <th><span
-                                            style="display: block; white-space: nowrap;">{{ position.timestamp }}</span>
+                                    <th>
+                                        <span class="timeago" datetime="{{ position.timestamp }}" title="{{ position.timestamp }}"></span>
                                     </th>
                                 </tr>
                             {% endifequal %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center">No entries</td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -173,11 +183,47 @@
             <!--closed positions-->
             <div class="tab-pane fade" id="closed_positions_tab">
                 <div class="closed_positions_tab_inner tab_inner">
-
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Size</th>
+                                <th>Value</th>
+                                <th>Entry Price</th>
+                                <th>Mark Price</th>
+                                <th>Liq. Price</th>
+                                <th>Margin</th>
+                                <th>Unrealised PNL<!--  (ROE %) --></th>
+                                <th>Realised PNL</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for position in positions %}
+                            {% ifequal position.isOpen 0 %}
+                                <tr data-order-type="{{ position.side }}">
+                                    <td>{{ position.symbol }}</td>
+                                    <td>{{ position.currentQty }}</td>
+                                    <td>{{ position.value }} XBT</td>
+                                    <td>{{ position.avgEntryPrice }}</td>
+                                    <td>{{ position.markPrice }}</td>
+                                    <td>{{ position.liquidationPrice }}</td>
+                                    <td>{{ position.maintMargin }}</td>
+                                    <td>{{ position.unrealisedGrossPnl }}</td>
+                                    <td>{{ position.realizedPnl }}</td>
+                                    <th>
+                                        <span class="timeago" datetime="{{ position.timestamp }}" title="{{ position.timestamp }}"></span>
+                                    </th>
+                                </tr>
+                            {% endifequal %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center">No entries</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <pre>
-{#                    {{ orderDump }}#}
-                </pre>
             </div>
             <!--/closed positions-->
 
@@ -210,8 +256,13 @@
                                 <td>{{ o.value }} XBT</td>
                                 <td>{{ o.ordType }}</td>
                                 <td>{{ o.ordStatus }}</td>
-                                <td><span class="timeago" datetime="{{ o.timestamp }}" title="{{ o.timestamp }}"></span>
+                                <td>
+                                    <span class="timeago" datetime="{{ o.timestamp }}" title="{{ o.timestamp }}"></span>
                                 </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center">No entries</td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -229,18 +280,18 @@
                 <div class="stops_tab_inner tab_inner">
                     <table class="table table-striped">
                         <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                            <th>Filled</th>
-                            <th>Stop Price</th>
-                            <th>Triggering Price</th>
-                            <th>Fill Price</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Time</th>
-                        </tr>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Qty</th>
+                                <th>Price</th>
+                                <th>Filled</th>
+                                <th>Stop Price</th>
+                                <th>Triggering Price</th>
+                                <th>Fill Price</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Time</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {% for s in stops %}
@@ -254,11 +305,15 @@
                                 <td>{{ s.avgPx }}</td>
                                 <td>{{ s.execInst }}</td>
                                 <td>{{ s.status }}</td>
-                                <td><span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span>
+                                <td>
+                                    <span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span>
                                 </td>
                             </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10" class="text-center">No entries</td>
+                            </tr>
                         {% endfor %}
-
                         </tbody>
                     </table>
                 </div>
@@ -272,21 +327,20 @@
             <!--fills-->
             <div class="tab-pane fade" id="fills">
                 <div class="fills_inner tab_inner">
-                    <svg class="chart" id="fills-chart" width="960" height="500"></svg>
                     <table class="table table-striped">
                         <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Qty</th>
-                            <th>Exec Qty</th>
-                            <th>Remaining</th>
-                            <th>Exec Price</th>
-                            {#                            <th>Price</th>#}
-                            <th>Value</th>
-                            <th>Type</th>
-                            <th>OrderID</th>
-                            <th>Time</th>
-                        </tr>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Qty</th>
+                                <th>Exec Qty</th>
+                                <th>Remaining</th>
+                                <th>Exec Price</th>
+                                {#                            <th>Price</th>#}
+                                <th>Value</th>
+                                <th>Type</th>
+                                <th>OrderID</th>
+                                <th>Time</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {% for fill in fills %}
@@ -310,10 +364,15 @@
                                     <td style="color: #{{ fill.idColor }};"><span
                                             data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
-                                    <td><span class="timeago" datetime="{{ fill.timestamp }}"
-                                              title="{{ fill.timestamp }}"></span></td>
+                                    <td>
+                                        <span class="timeago" datetime="{{ fill.timestamp }}" title="{{ fill.timestamp }}"></span>
+                                    </td>
                                 </tr>
                             {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center">No entries</td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -329,17 +388,17 @@
             <div class="tab-pane fade" id="order_history">
                 <table class="table table-striped">
                     <thead>
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Qty</th>
-                        <th>Price</th>
-                        <th>Filled</th>
-                        <th>Stop Price</th>
-                        <th>Fill Price</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Time</th>
-                    </tr>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Filled</th>
+                            <th>Stop Price</th>
+                            <th>Fill Price</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
                     </thead>
                     <tbody>
                     {% for h in history %}
@@ -352,11 +411,15 @@
                             <td>{{ h.avgPx }}</td>
                             <td>{{ h.ordType }}</td>
                             <td>{{ h.status }}</td>
-                            <td><span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span>
+                            <td>
+                                <span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span>
                             </td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center">No entries</td>
+                        </tr>
                     {% endfor %}
-
                     </tbody>
                 </table>
                 <div class="order_history_inner">
@@ -373,6 +436,15 @@
                 </div>
             </div>
             <!--/info-->
+
+
+            <!--charts-->
+            <div class="tab-pane" id="charts_tab">
+                <div class="info_tab_inner tab_inner">
+                    <svg class="chart" width="100%" height="500"></svg>
+                </div>
+            </div>
+            <!--/charts-->
         </div>
         <!-- <br> -->
     </div>
