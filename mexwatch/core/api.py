@@ -8,13 +8,15 @@ from core.models import User
 from core.utils import call_bitmex_api, get_http_response_for_key_error, get_error_http_response_object_not_found, \
     get_error_http_response
 
-charts = ["balanceHistory"]
+charts = ["balance", "profit"]
+
 
 @csrf_exempt
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def get_charts(request):
-    return HttpResponse(str(charts))
+    return HttpResponse(json.dumps({"charts": charts}, indent=2),
+                        content_type="application/json")
 
 @csrf_exempt
 @api_view(['GET'])
@@ -34,11 +36,15 @@ def get_chart_data(request):
     else:
         assert False, "Multiple users with the same username in database" #should not happen
 
-    if chart_name == "balanceHistory":
-        wallet_history = call_bitmex_api('/user/walletHistory', api_key=user.key_pub, api_secret=user.key_secret)
-        res = {"chart_type":"line",
-               "data": wallet_history}
-        return HttpResponse(json.dumps(res, indent=2))
+    if chart_name == "balance":
+        balance_history = call_bitmex_api('/user/walletHistory', api_key=user.key_pub, api_secret=user.key_secret)
+        for b in balance_history:
+            b["value"] = b["walletBalance"]
+
+        res = {"chart_type": "line",
+               "data": balance_history}
+
+        return HttpResponse(json.dumps(res, indent=2),
+                            content_type="application/json", )
     else:
         return get_error_http_response_object_not_found("Chart", chart_name)
-
