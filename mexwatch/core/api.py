@@ -41,9 +41,25 @@ def get_chart_data(request):
         for b in balance_history:
             b["value"] = b["walletBalance"]
 
-        res = {"chart_type": "line",
-               "data": balance_history}
 
+        res = {"chart_type": "line",
+               "data": list(reversed(balance_history))}
+
+        return HttpResponse(json.dumps(res, indent=2),
+                            content_type="application/json", )
+    elif chart_name == "profit":
+        balance_history = call_bitmex_api('/user/walletHistory', api_key=user.key_pub, api_secret=user.key_secret)
+        profit_history = []
+        ignore_transactTypeList = ["Deposit","Withdrawal"]
+        profit = 0
+        profit_history.append({"timestamp": balance_history[-1]["timestamp"], "value": 0})
+        for bh in reversed(balance_history):
+            if bh["transactType"] not in ignore_transactTypeList:
+                profit += bh["amount"]
+                profit_history.append({"timestamp": bh["timestamp"], "value": profit})
+
+        res = {"chart_type": "line",
+               "data": profit_history}
         return HttpResponse(json.dumps(res, indent=2),
                             content_type="application/json", )
     else:

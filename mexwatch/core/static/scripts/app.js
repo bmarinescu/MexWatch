@@ -16,6 +16,8 @@
         });
     }
 
+    console.log("aa");
+
     function getChartData(user, chart) {
         $.ajax({
             method: 'GET',
@@ -63,9 +65,9 @@
 
 
 
+function showChart(data) {
 
-
-var data = walletHistory;
+// var data = walletHistory;
 
 //setup variables
 var margin = {top: 20, right: 20, bottom: 100, left: 50},
@@ -83,7 +85,7 @@ var margin = {top: 20, right: 20, bottom: 100, left: 50},
             return x(d.date);
         })
         .y(function(d) {
-            return y(d.walletBalance);
+            return y(d.value);
         }),
     tooltip = d3.select("body").append("div")
     .attr("class", "d3-tooltip")
@@ -100,8 +102,8 @@ var margin = {top: 20, right: 20, bottom: 100, left: 50},
   }));
 
   y.domain(d3.extent(data, function(d) {
-      d.walletBalance = d.walletBalance / 100000000;
-      return d.walletBalance;
+      d.value = d.value / 100000000;
+      return d.value;
   }));
 
   // add the valueline path.
@@ -117,7 +119,7 @@ var margin = {top: 20, right: 20, bottom: 100, left: 50},
         .attr('class', 'dot')
         .attr("r", 3.5)
         .attr("cx", function(d) { return x(d.date); })
-        .attr("cy", function(d) { return y(d.walletBalance); })
+        .attr("cy", function(d) { return y(d.value); })
         .on("mouseover", function(d) {
             tooltip.transition()
                 .duration(200)
@@ -127,7 +129,7 @@ var margin = {top: 20, right: 20, bottom: 100, left: 50},
                     "Type: " + d.transactType + "<br/>" +
                     "Status: " + d.transactStatus + "<br/>" +
                     "Date: " + d.timestamp + "<br/>" +
-                    "Value: " + d.walletBalance  +  "<br />" +
+                    "Value: " + d.value  +  "<br />" +
                     "Amount: " + d.amount + " " + d.currency
                 )
                 .style("left", (d3.event.pageX + 10) + "px")
@@ -155,3 +157,4 @@ var margin = {top: 20, right: 20, bottom: 100, left: 50},
   svg.append("g")
       .attr("class", "axis")
       .call(d3.axisLeft(y));
+}
