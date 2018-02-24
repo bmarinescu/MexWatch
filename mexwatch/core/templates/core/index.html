@@ -24,6 +24,7 @@
 			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 		<![endif]-->
     <script src="{% static 'core/timeago.js' %}"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
 
@@ -35,52 +36,53 @@
         <hr>
         <table class="table table-users">
             <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Balance</th>
-                    <th>Positions Value</th>
-                </tr>
+            <tr>
+                <th>User</th>
+                <th>Balance</th>
+                <th>Positions Value</th>
+            </tr>
             </thead>
             <tbody>
-                {% for u in users %}
+            {% for u in users %}
                 <tr class="active-user {% ifequal currentUser.id u.id %}active{% endifequal %}">
                     <td>
                         <a href="{% url "user" u.name %}">{{ u.name }}</a>
                     </td>
                     <td>{{ u.wallet.amount }}
                         {% if u.hide_balance %}
-                        <span class="text-success"
-                              style="cursor: pointer;"
-                              data-toggle="tooltip"
-                              data-placement="auto"
-                              title="The user has a hidden balance. All trades are scaled to a balance of 1 BTC">
-                            <i class="fa fa-question-circle"></i>
-                        </span>
+                            <span class="text-success"
+                                  style="cursor: pointer;"
+                                  data-toggle="tooltip"
+                                  data-placement="auto"
+                                  title="The user has a hidden balance. All trades are scaled to a balance of 1 BTC">
+							<i class="fa fa-question-circle"></i>
+						</span>
                         {% endif %}
                     </td>
                     <td>{{ u.total_positions_value }}</td>
                 </tr>
-                {% empty %}
+            {% empty %}
                 <tr>
                     <td colspan="3">No entries</td>
                 </tr>
-                {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
     </div>
     <div class="toggle-sidebar-contain">
-		<span class="btn btn-danger btn-sm" id="menu-toggle">
+		<span class="btn btn-danger btn-sm" id="menu-toggle" data-toggle="tooltip" data-placement="right"
+              title="Toggle sidebar">
 			<i class="fa fa-bars"></i>
 		</span>
     </div>
     <div class="corner_balance">
         <span title="Total balance">{{ wallet.amount }} BTC</span>
     </div>
-    {#    <div class="container">#}
-    {#        <pre>#}
-    {#            {{ walletDump }}#}
-    {#        </pre>#}
-    {#    </div>#}
+{#        <div class="container">#}
+{#            <pre>#}
+{#                {{ walletDump }}#}
+{#            </pre>#}
+{#        </div>#}
     <div class="container">
         <!--tab navigation-->
         <ul id="tabs_main" class="nav nav-tabs">
@@ -121,9 +123,9 @@
                 <a href="#charts_tab" data-toggle="tab">Charts</a>
             </li>
             <li>
-                <span class="refresh_btn">
-                    <i class="fa fa-refresh text-success"></i>
-                </span>
+				<span class="refresh_btn">
+					<i class="fa fa-refresh text-success"></i>
+				</span>
             </li>
         </ul>
         <!--/tab navigation-->
@@ -134,18 +136,18 @@
                 <div class="positions_tab_inner tab_inner">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th>Size</th>
-                                <th>Value</th>
-                                <th>Entry Price</th>
-                                <th>Mark Price</th>
-                                <th>Liq. Price</th>
-                                <th>Margin</th>
-                                <th>Unrealised PNL<!--  (ROE %) --></th>
-                                <th>Realised PNL</th>
-                                <th>Time</th>
-                            </tr>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Size</th>
+                            <th>Value</th>
+                            <th>Entry Price</th>
+                            <th>Mark Price</th>
+                            <th>Liq. Price</th>
+                            <th>Margin</th>
+                            <th>Unrealised PNL<!--  (ROE %) --></th>
+                            <th>Realised PNL</th>
+                            <th>Time</th>
+                        </tr>
                         </thead>
                         <tbody>
                         {% for position in positions %}
@@ -161,11 +163,12 @@
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
                                     <th>
-                                        <span class="timeago" datetime="{{ position.timestamp }}" title="{{ position.timestamp }}"></span>
+                                        <span class="timeago" datetime="{{ position.timestamp }}"
+                                              title="{{ position.timestamp }}"></span>
                                     </th>
                                 </tr>
                             {% endifequal %}
-                            {% empty %}
+                        {% empty %}
                             <tr>
                                 <td colspan="10" class="text-center">No entries</td>
                             </tr>
@@ -173,9 +176,9 @@
                         </tbody>
                     </table>
                 </div>
-{#                <pre>#}
-{#                    {{ positionsDump }}#}
-{#                </pre>#}
+                {#                <pre>#}
+                {#                    {{ positionsDump }}#}
+                {#                </pre>#}
             </div>
             <!--/positions-->
 
@@ -185,18 +188,18 @@
                 <div class="closed_positions_tab_inner tab_inner">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th>Size</th>
-                                <th>Value</th>
-                                <th>Entry Price</th>
-                                <th>Mark Price</th>
-                                <th>Liq. Price</th>
-                                <th>Margin</th>
-                                <th>Unrealised PNL<!--  (ROE %) --></th>
-                                <th>Realised PNL</th>
-                                <th>Time</th>
-                            </tr>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Size</th>
+                            <th>Value</th>
+                            <th>Entry Price</th>
+                            <th>Mark Price</th>
+                            <th>Liq. Price</th>
+                            <th>Margin</th>
+                            <th>Unrealised PNL<!--  (ROE %) --></th>
+                            <th>Realised PNL</th>
+                            <th>Time</th>
+                        </tr>
                         </thead>
                         <tbody>
                         {% for position in positions %}
@@ -212,11 +215,12 @@
                                     <td>{{ position.unrealisedGrossPnl }}</td>
                                     <td>{{ position.realizedPnl }}</td>
                                     <th>
-                                        <span class="timeago" datetime="{{ position.timestamp }}" title="{{ position.timestamp }}"></span>
+                                        <span class="timeago" datetime="{{ position.timestamp }}"
+                                              title="{{ position.timestamp }}"></span>
                                     </th>
                                 </tr>
                             {% endifequal %}
-                            {% empty %}
+                        {% empty %}
                             <tr>
                                 <td colspan="10" class="text-center">No entries</td>
                             </tr>
@@ -268,9 +272,9 @@
                         </tbody>
                     </table>
                 </div>
-{#                <pre>#}
-{#                    {{ orderDump }}#}
-{#                </pre>#}
+                {#                <pre>#}
+                {#                    {{ orderDump }}#}
+                {#                </pre>#}
             </div>
             <!--/active orders-->
 
@@ -280,18 +284,18 @@
                 <div class="stops_tab_inner tab_inner">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th>Qty</th>
-                                <th>Price</th>
-                                <th>Filled</th>
-                                <th>Stop Price</th>
-                                <th>Triggering Price</th>
-                                <th>Fill Price</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>Time</th>
-                            </tr>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Filled</th>
+                            <th>Stop Price</th>
+                            <th>Triggering Price</th>
+                            <th>Fill Price</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
                         </thead>
                         <tbody>
                         {% for s in stops %}
@@ -309,7 +313,7 @@
                                     <span class="timeago" datetime="{{ s.timestamp }}" title="{{ s.timestamp }}"></span>
                                 </td>
                             </tr>
-                            {% empty %}
+                        {% empty %}
                             <tr>
                                 <td colspan="10" class="text-center">No entries</td>
                             </tr>
@@ -317,9 +321,9 @@
                         </tbody>
                     </table>
                 </div>
-{#                <pre>#}
-{#                    {{ stopsDump }}#}
-{#                </pre>#}
+                {#                <pre>#}
+                {#                    {{ stopsDump }}#}
+                {#                </pre>#}
             </div>
             <!--/stops-->
 
@@ -329,18 +333,18 @@
                 <div class="fills_inner tab_inner">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Symbol</th>
-                                <th>Qty</th>
-                                <th>Exec Qty</th>
-                                <th>Remaining</th>
-                                <th>Exec Price</th>
-                                {#                            <th>Price</th>#}
-                                <th>Value</th>
-                                <th>Type</th>
-                                <th>OrderID</th>
-                                <th>Time</th>
-                            </tr>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Qty</th>
+                            <th>Exec Qty</th>
+                            <th>Remaining</th>
+                            <th>Exec Price</th>
+                            {#                            <th>Price</th>#}
+                            <th>Value</th>
+                            <th>Type</th>
+                            <th>OrderID</th>
+                            <th>Time</th>
+                        </tr>
                         </thead>
                         <tbody>
                         {% for fill in fills %}
@@ -365,11 +369,12 @@
                                             data-long-id="{{ fill.orderID }}">{{ fill.shortId }}</span></td>
                                     {#                                    <td><?php echo date("M d, Y, H:i:s",strtotime($fill['timestamp'])); ?></td>#}
                                     <td>
-                                        <span class="timeago" datetime="{{ fill.timestamp }}" title="{{ fill.timestamp }}"></span>
+                                        <span class="timeago" datetime="{{ fill.timestamp }}"
+                                              title="{{ fill.timestamp }}"></span>
                                     </td>
                                 </tr>
                             {% endif %}
-                            {% empty %}
+                        {% empty %}
                             <tr>
                                 <td colspan="9" class="text-center">No entries</td>
                             </tr>
@@ -377,9 +382,9 @@
                         </tbody>
                     </table>
                 </div>
-{#                <pre>#}
-{#                    {{ fillsDump }}#}
-{#                </pre>#}
+                {#                <pre>#}
+                {#                    {{ fillsDump }}#}
+                {#                </pre>#}
             </div>
             <!--/fills-->
 
@@ -388,17 +393,17 @@
             <div class="tab-pane fade" id="order_history">
                 <table class="table table-striped">
                     <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                            <th>Filled</th>
-                            <th>Stop Price</th>
-                            <th>Fill Price</th>
-                            <th>Type</th>
-                            <th>Status</th>
-                            <th>Time</th>
-                        </tr>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Filled</th>
+                        <th>Stop Price</th>
+                        <th>Fill Price</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
                     </thead>
                     <tbody>
                     {% for h in history %}
@@ -415,7 +420,7 @@
                                 <span class="timeago" datetime="{{ h.timestamp }}" title="{{ h.timestamp }}"></span>
                             </td>
                         </tr>
-                        {% empty %}
+                    {% empty %}
                         <tr>
                             <td colspan="9" class="text-center">No entries</td>
                         </tr>
@@ -432,7 +437,7 @@
             <!--info-->
             <div class="tab-pane fade in active" id="info_tab">
                 <div class="info_tab_inner tab_inner">
-{#                    <pre>{{ instruments }}</pre>#}
+                    {#                    <pre>{{ instruments }}</pre>#}
                 </div>
             </div>
             <!--/info-->
@@ -445,14 +450,16 @@
                         <h4>Default chart</h4>
                         <div class="row">
                             <div class="col-sm-11">
-                                <svg class="chart" width="100%" height="500"></svg>
+                                <svg id="chart" class="chart" width="100%" height="500"></svg>
                             </div>
                             <div class="col-sm-1">
-                                <button class="btn-link add-chart" data-toggle="tooltip" title="Add chart">
+                                <button type="button" class="btn-link add-chart" data-toggle="tooltip"
+                                        title="Add chart">
                                     <span class="sr-only">Add chart</span>
                                     <i class="fa fa-plus-circle"></i>
                                 </button>
-                                <button class="btn-link delete-chart" data-toggle="tooltip" title="Delete chart">
+                                <button type="button" class="btn-link delete-chart" data-toggle="tooltip"
+                                        title="Delete chart">
                                     <span class="sr-only">Delete chart</span>
                                     <i class="fa fa-minus-circle"></i>
                                 </button>
@@ -478,6 +485,16 @@
                             </div>
                         </div>
                     </div>
+                    <div class="chart-options">
+                        <div class="row">
+                            <div class="col-xs-12">
+                                {#                                {{ for chart in charts }}#}
+                                <div class="pretty p-default p-curve"><input type="checkbox">
+                                    <div class="state"><label>Default</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!--/charts-->
@@ -495,15 +512,15 @@
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="key_name">Name</label>
-                            <input type="text" class="form-control" id="key_name" name="key_name" placeholder="">
+                            <input type="text" class="form-control" id="key_name" name="key_name" required>
                         </div>
                         <div class="form-group">
                             <label for="key_pub">Public key</label>
-                            <input type="text" class="form-control" id="key_pub" name="key_pub" placeholder="">
+                            <input type="text" class="form-control" id="key_pub" name="key_pub" required>
                         </div>
                         <div class="form-group">
                             <label for="key_secret">Secret key</label>
-                            <input type="text" class="form-control" id="key_secret" name="key_secret" placeholder="">
+                            <input type="text" class="form-control" id="key_secret" name="key_secret" required>
                         </div>
 
                         <div class="mag_top" style="display: inline-block; cursor: pointer;" data-toggle="tooltip"
@@ -526,7 +543,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" tabindex="-1">Close
+                            </button>
                             <button type="submit" class="btn btn-default">Submit</button>
                         </div>
                     </div>
@@ -540,19 +558,36 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script>
+    var walletHistory = "";
+
+    axios.get('/api/chart_data/', {
+        params: {
+            username: "{{ currentUser.name }}",
+            chart_name: "profit"
+        }
+    })
+        .then(function (response) {
+           //walletHistory = JSON.parse(JSON.stringify(response.data.data));
+           showChart(response.data.data)
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
     var wallet = JSON.parse("{{ walletDump | safe | escapejs}}"),
-    walletHistory = JSON.parse("{{ walletHistory | safe | escapejs}}"),
-    positions = JSON.parse("{{ positionsDump | safe | escapejs}}"),
-    orders = JSON.parse("{{ orderDump | safe | escapejs}}"),
-    stops = JSON.parse("{{ stopsDump | safe | escapejs}}"),
-    fills = JSON.parse("{{ fillsDump | safe | escapejs}}"),
-    instruments = JSON.parse("{{ instruments | safe | escapejs}}");
+        walletHistoryx = JSON.parse("{{ walletHistory | safe | escapejs}}"),
+        positions = JSON.parse("{{ positionsDump | safe | escapejs}}"),
+        orders = JSON.parse("{{ orderDump | safe | escapejs}}"),
+        stops = JSON.parse("{{ stopsDump | safe | escapejs}}"),
+        fills = JSON.parse("{{ fillsDump | safe | escapejs}}"),
+        instruments = JSON.parse("{{ instruments | safe | escapejs}}");
+       console.log("bb");
 </script>
 <script src="{% static 'scripts/app.js' %}"></script>
 <script>
     $(function () {
         $("body").addClass("loaded");
-        // curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
+// curl -X GET --header 'Accept: application/json' 'https://testnet.bitmex.com/api/v1/position'
         $('.refresh_btn').click(function (ev) {
             ev.preventDefault();
             $("body").removeClass("loaded");
@@ -562,17 +597,17 @@
         });
         $("#form_create_use").modal("show");
 
-        // ########################################################
-        // $('#add_key_modal').modal('show');
-        // ########################################################
+// ########################################################
+// $('#add_key_modal').modal('show');
+// ########################################################
 
         var timeagoInstance = timeago();
         var nodes = document.querySelectorAll('.timeago');
-        // use render method to render nodes in real time
+// use render method to render nodes in real time
         timeagoInstance.render(nodes);
-        // cancel real-time render for every node
+// cancel real-time render for every node
         timeago.cancel();
-        // or for the specific one
+// or for the specific one
         timeago.cancel(nodes[0]);
 
         $('[data-toggle="tooltip"]').tooltip()
@@ -613,8 +648,8 @@
             url: $(this).attr('action'),
             data: $(this).serialize(),
             success: function (data) {
-                // console.log(data + " \n");
-                // console.log(success_msg + " \n");
+// console.log(data + " \n");
+// console.log(success_msg + " \n");
 
                 $(".printArea").empty().removeClass("text-success text-danger").addClass("text-success").append(data.message);
             },
@@ -624,8 +659,6 @@
             }
         });
     });
-
-
 </script>
 </body>
 </html>
