@@ -23,7 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^$', views.frontpage, name='frontpage'),
     url(r'^u/(?P<username>.+)$', views.userpage, name='user'),
-    url(r'^create_user/$', views.create_user, name='create_user'),
+    url(r'^create_user/$', api.create_user, name='create_user'),
     url(r'^api/charts/$', api.get_charts, name='get_charts'),
     url(r'^api/chart_data/$', api.get_chart_data, name='get_chart_data'),
 ]

@@ -78,11 +78,11 @@
     <div class="corner_balance">
         <span title="Total balance">{{ wallet.amount }} BTC</span>
     </div>
-{#        <div class="container">#}
-{#            <pre>#}
-{#                {{ walletDump }}#}
-{#            </pre>#}
-{#        </div>#}
+    {#        <div class="container">#}
+    {#            <pre>#}
+    {#                {{ walletDump }}#}
+    {#            </pre>#}
+    {#        </div>#}
     <div class="container">
         <!--tab navigation-->
         <ul id="tabs_main" class="nav nav-tabs">
@@ -95,7 +95,7 @@
             <li>
                 <a href="#closed_positions_tab" data-toggle="tab">
                     Closed Positions
-                    <strong>(-)</strong>
+                    <strong>({{ closedPositions|length }})</strong>
                 </a>
             </li>
             <li>
@@ -151,23 +151,21 @@
                         </thead>
                         <tbody>
                         {% for position in positions %}
-                            {% ifequal position.isOpen 1 %}
-                                <tr data-order-type="{{ position.side }}">
-                                    <td>{{ position.symbol }}</td>
-                                    <td>{{ position.currentQty }}</td>
-                                    <td>{{ position.value }} XBT</td>
-                                    <td>{{ position.avgEntryPrice }}</td>
-                                    <td>{{ position.markPrice }}</td>
-                                    <td>{{ position.liquidationPrice }}</td>
-                                    <td>{{ position.maintMargin }}</td>
-                                    <td>{{ position.unrealisedGrossPnl }}</td>
-                                    <td>{{ position.realizedPnl }}</td>
-                                    <th>
-                                        <span class="timeago" datetime="{{ position.timestamp }}"
-                                              title="{{ position.timestamp }}"></span>
-                                    </th>
-                                </tr>
-                            {% endifequal %}
+                            <tr data-order-type="{{ position.side }}">
+                                <td>{{ position.symbol }}</td>
+                                <td>{{ position.currentQty }}</td>
+                                <td>{{ position.value }} XBT</td>
+                                <td>{{ position.avgEntryPrice }}</td>
+                                <td>{{ position.markPrice }}</td>
+                                <td>{{ position.liquidationPrice }}</td>
+                                <td>{{ position.maintMargin }}</td>
+                                <td>{{ position.unrealisedGrossPnl }}</td>
+                                <td>{{ position.realizedPnl }}</td>
+                                <th>
+                                    <span class="timeago" datetime="{{ position.timestamp }}"
+                                          title="{{ position.timestamp }}"></span>
+                                </th>
+                            </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="10" class="text-center">No entries</td>
@@ -176,9 +174,9 @@
                         </tbody>
                     </table>
                 </div>
-                {#                <pre>#}
-                {#                    {{ positionsDump }}#}
-                {#                </pre>#}
+{#                <pre>#}
+{#                    {{ positionsDump }}#}
+{#                </pre>#}
             </div>
             <!--/positions-->
 
@@ -190,36 +188,15 @@
                         <thead>
                         <tr>
                             <th>Symbol</th>
-                            <th>Size</th>
-                            <th>Value</th>
-                            <th>Entry Price</th>
-                            <th>Mark Price</th>
-                            <th>Liq. Price</th>
-                            <th>Margin</th>
-                            <th>Unrealised PNL<!--  (ROE %) --></th>
-                            <th>Realised PNL</th>
-                            <th>Time</th>
+                            <th>Profit/Loss</th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for position in positions %}
-                            {% ifequal position.isOpen 0 %}
-                                <tr data-order-type="{{ position.side }}">
-                                    <td>{{ position.symbol }}</td>
-                                    <td>{{ position.currentQty }}</td>
-                                    <td>{{ position.value }} XBT</td>
-                                    <td>{{ position.avgEntryPrice }}</td>
-                                    <td>{{ position.markPrice }}</td>
-                                    <td>{{ position.liquidationPrice }}</td>
-                                    <td>{{ position.maintMargin }}</td>
-                                    <td>{{ position.unrealisedGrossPnl }}</td>
-                                    <td>{{ position.realizedPnl }}</td>
-                                    <th>
-                                        <span class="timeago" datetime="{{ position.timestamp }}"
-                                              title="{{ position.timestamp }}"></span>
-                                    </th>
-                                </tr>
-                            {% endifequal %}
+                        {% for closed_position in closedPositions %}
+                            <tr data-order-type="{{ closed_position.side }}">
+                                <td>{{ closed_position.symbol }}</td>
+                                <td>{{ closed_position.prevRealisedPnl }}</td>
+                            </tr>
                         {% empty %}
                             <tr>
                                 <td colspan="10" class="text-center">No entries</td>
@@ -228,6 +205,9 @@
                         </tbody>
                     </table>
                 </div>
+{#                <pre>#}
+{#                    {{ closedPositionsDump }}#}
+{#                </pre>#}
             </div>
             <!--/closed positions-->
 
@@ -567,8 +547,8 @@
         }
     })
         .then(function (response) {
-           //walletHistory = JSON.parse(JSON.stringify(response.data.data));
-           showChart(response.data.data)
+            //walletHistory = JSON.parse(JSON.stringify(response.data.data));
+            showChart(response.data.data)
         })
         .catch(function (error) {
             console.log(error);
@@ -581,7 +561,7 @@
         stops = JSON.parse("{{ stopsDump | safe | escapejs}}"),
         fills = JSON.parse("{{ fillsDump | safe | escapejs}}"),
         instruments = JSON.parse("{{ instruments | safe | escapejs}}");
-       console.log("bb");
+    console.log("bb");
 </script>
 <script src="{% static 'scripts/app.js' %}"></script>
 <script>

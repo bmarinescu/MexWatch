@@ -1,14 +1,12 @@
 import json
 import logging
 
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.decorators import api_view
 
 from core.models import User
 from core.utils import SATOSHIS_PER_BTC, satoshis_to_btc, get_display_time, get_display_number, call_bitmex_api, \
-    get_http_response_for_key_error, get_error_http_response, textToColor
+    textToColor
 from mexwatch.settings import JSON_INDENT
 
 logger = logging.getLogger(__name__)
@@ -19,52 +17,6 @@ def frontpage(request):
         User.objects.create(name="benis", key_pub="4YFgfRe713-feq7ovWHtl_da",
                             key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m")
     return redirect("user", User.objects.first().name)
-
-
-@csrf_exempt
-@api_view(['POST'])
-def create_user(request):
-    try:
-        name = request.POST["key_name"]
-        key_pub = request.POST["key_pub"]
-        key_secret = request.POST["key_secret"]
-    except KeyError as e:
-        return get_http_response_for_key_error(e)
-
-    hide_balances = request.POST.get("hide_balance", "false")
-
-    if User.objects.filter(name=name).count() != 0:
-        return get_error_http_response(409, "Name already taken.")
-
-    api_key_json = call_bitmex_api('/apiKey', api_key=key_pub, api_secret=key_secret)
-    if "error" in api_key_json and api_key_json["error"]["name"] == "HTTPError":
-        return get_error_http_response(400, "Invalid API key/secret pair")
-
-    api_key_json = api_key_json[0]
-    if len(api_key_json["permissions"]) != 0:
-        return get_error_http_response(400, "Please add a key that has no permissions assigned to it")
-
-    existing_user_query = User.objects.filter(key_pub=key_pub, key_secret=key_secret)
-    if existing_user_query.count() == 0:
-        User.objects.create(name=name, key_pub=key_pub, key_secret=key_secret, hide_balance=(hide_balances == "on"))
-
-        return HttpResponse(
-            '{"message" : "User created!"}',
-            content_type="application/json",
-            status=200
-        )
-    else:
-        assert existing_user_query.count() == 1
-        existing_user: User = existing_user_query.first()
-        existing_user.name = name
-        existing_user.hide_balance = (hide_balances == "on")
-        existing_user.save()
-
-        return HttpResponse(
-            '{"message" : "Display name has been replaced"}',
-            content_type="application/json",
-            status=200
-        )
 
 
 def userpage(request, username):
@@ -135,18 +87,23 @@ def userpage(request, username):
             u.total_positions_value = 0
             w["amount"] = 0
 
+    closed_positions_json = [item for item in positions_json if not item["isOpen"]]
+    positions_json = [item for item in positions_json if item["isOpen"]]
+
+    for cp in closed_positions_json:
+        cp["prevRealisedPnl"] = str(satoshis_to_btc(cp["prevRealisedPnl"])) + " BTC"
+
     for p in positions_json:
-        if p["isOpen"]:
-            p['maintMargin'] = str(round(float(p["maintMargin"]) / SATOSHIS_PER_BTC, 2)) + \
-                               (" (Cross)", "")[p["crossMargin"] == "1"]
-            p["unrealisedGrossPnl"] = round(multiplier * p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
-            p["realizedPnl"] = round(
-                multiplier * (float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
-            if p["symbol"] == "XBTUSD":
-                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
-            else:
-                p["value"] = p["currentQty"] * p["markPrice"]
-            p["value"] = round(multiplier * p["value"], 4)
+        p['maintMargin'] = str(round(float(p["maintMargin"]) / SATOSHIS_PER_BTC, 2)) + \
+                           (" (Cross)", "")[p["crossMargin"] == "1"]
+        p["unrealisedGrossPnl"] = round(multiplier * p["unrealisedGrossPnl"] / SATOSHIS_PER_BTC, 4)
+        p["realizedPnl"] = round(
+            multiplier * (float(p["rebalancedPnl"]) + float(p["realisedPnl"])) / SATOSHIS_PER_BTC, 4)
+        if p["symbol"] == "XBTUSD":
+            p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
+        else:
+            p["value"] = p["currentQty"] * p["markPrice"]
+        p["value"] = round(multiplier * p["value"], 4)
         p["timestamp"] = get_display_time(p["timestamp"])
         if p["currentQty"] < 0:
             p["side"] = "Short"
@@ -209,6 +166,8 @@ def userpage(request, username):
         'fillsDump': json.dumps(fills_json, indent=JSON_INDENT),
         'positions': positions_json,
         'positionsDump': json.dumps(positions_json, indent=JSON_INDENT),
+        'closedPositions': closed_positions_json,
+        'closedPositionsDump': json.dumps(closed_positions_json, indent=JSON_INDENT),
         'orders': order_json,
         'orderDump': json.dumps(order_json, indent=JSON_INDENT),
         'stops': stop_json,
