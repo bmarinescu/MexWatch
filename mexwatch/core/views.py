@@ -71,7 +71,7 @@ def userpage(request, username):
         total_pos_value = 0
         for p in pos:
             if p["symbol"] == "XBTUSD":
-                p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
+                p["value"] = abs(p["currentCost"]) / SATOSHIS_PER_BTC
             else:
                 if p["markPrice"] is None: p["markPrice"] = 0
                 p["value"] = p["currentQty"] * p["markPrice"]
@@ -103,7 +103,7 @@ def userpage(request, username):
             p["value"] = p["currentCost"] / SATOSHIS_PER_BTC
         else:
             p["value"] = p["currentQty"] * p["markPrice"]
-        p["value"] = round(multiplier * p["value"], 4)
+        p["value"] = abs(round(multiplier * p["value"], 4))
         p["timestamp"] = get_display_time(p["timestamp"])
         if p["currentQty"] < 0:
             p["side"] = "Short"
