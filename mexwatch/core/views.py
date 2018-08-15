@@ -74,9 +74,9 @@ def userpage(request, username):
                 p["value"] = abs(p["currentCost"]) / SATOSHIS_PER_BTC
             else:
                 if p["markPrice"] is None: p["markPrice"] = 0
-                p["value"] = p["currentQty"] * p["markPrice"]
-            p["value"] = get_display_number(p["value"])
+                p["value"] = float(p["currentQty"]) * float(p["markPrice"])
             total_pos_value += p["value"]
+            p["value"] = get_display_number(p["value"])
         if w["amount"] != 0:
             if u.hide_balance:
                 u.total_positions_value = get_display_number(multiplier * total_pos_value)
