@@ -70,13 +70,14 @@ def userpage(request, username):
         pos = call_bitmex_api('/position', api_key=u.key_pub, api_secret=u.key_secret)
         total_pos_value = 0
         for p in pos:
-            if p["symbol"] == "XBTUSD":
+            if "USD" in p["symbol"]:
                 p["value"] = abs(p["currentCost"]) / SATOSHIS_PER_BTC
             else:
                 if p["markPrice"] is None: p["markPrice"] = 0
                 p["value"] = float(p["currentQty"]) * float(p["markPrice"])
             total_pos_value += p["value"]
             p["value"] = get_display_number(p["value"])
+            p["currentProfit"] = p["realisedPnl"] + p["unrealisedGrossPnl"]
         if w["amount"] != 0:
             if u.hide_balance:
                 u.total_positions_value = get_display_number(multiplier * total_pos_value)
