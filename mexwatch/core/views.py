@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 def frontpage(request):
     if User.objects.count() == 0:
         User.objects.create(name="benis", key_pub="4YFgfRe713-feq7ovWHtl_da",
-                            key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m")
+                            key_secret="SWkuxaufF9G2n_YgLONCAKAvtPBwBBYy17ZW0Fn8kH2iUs0m",
+                            hide_balance=False)
     return redirect("user", User.objects.first().name)
 
 
